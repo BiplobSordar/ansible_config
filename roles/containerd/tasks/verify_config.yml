@@ -1,0 +1,36 @@
+---
+- name: Check config exists
+  ansible.builtin.stat:
+    path: "{{ containerd_config_path }}"
+  register: config_file
+
+- name: Assert config exists
+  ansible.builtin.assert:
+    that:
+      - config_file.stat.exists
+    fail_msg: >
+      containerd config missing.
+
+- name: Ensure SystemdCgroup=true
+  ansible.builtin.replace:
+    path: "{{ containerd_config_path }}"
+    regexp: 'SystemdCgroup\s*=\s*false'
+    replace: 'SystemdCgroup = true'
+  register: config_result
+  notify: Restart containerd
+
+- name: Flush handlers immediately
+  ansible.builtin.meta: flush_handlers
+
+- name: Read config
+  ansible.builtin.command:
+    cmd: grep SystemdCgroup "{{ containerd_config_path }}"
+  register: config_check
+  changed_when: false
+
+- name: Assert SystemdCgroup=true
+  ansible.builtin.assert:
+    that:
+      - "'true' in config_check.stdout"
+    fail_msg: >
+      SystemdCgroup is not true.

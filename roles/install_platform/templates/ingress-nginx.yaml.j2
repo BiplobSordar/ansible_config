@@ -1,0 +1,116 @@
+# {{ ansible_managed }}
+
+###############################################################################
+# Ingress NGINX Controller
+#
+# Production AWS Configuration
+#
+# Creates:
+#
+# AWS NLB
+#       |
+#       |
+# Ingress Controller
+#
+###############################################################################
+
+
+controller:
+
+  ###########################################################################
+  # High Availability
+  ###########################################################################
+
+  replicaCount: 2
+
+
+
+  ###########################################################################
+  # Ingress Class
+  ###########################################################################
+
+  ingressClassResource:
+
+    enabled: true
+
+    name: nginx
+
+    default: true
+
+
+
+  ###########################################################################
+  # AWS Load Balancer
+  ###########################################################################
+
+  service:
+
+    enabled: true
+
+    type: LoadBalancer
+
+
+    annotations:
+
+      # AWS Network Load Balancer
+
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+
+
+      # Public internet facing
+
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+
+
+      # Preserve client IP
+
+      service.beta.kubernetes.io/aws-load-balancer-target-type: "instance"
+
+
+
+  ###########################################################################
+  # Metrics
+  ###########################################################################
+
+  metrics:
+
+    enabled: true
+
+
+
+  ###########################################################################
+  # Admission Webhook
+  ###########################################################################
+
+  admissionWebhooks:
+
+    enabled: true
+
+
+
+  ###########################################################################
+  # Resource Management
+  ###########################################################################
+
+  resources:
+
+    requests:
+
+      cpu: 100m
+
+      memory: 128Mi
+
+
+    limits:
+
+      cpu: 500m
+
+      memory: 512Mi
+
+
+
+  ###########################################################################
+  # Security
+  ###########################################################################
+
+  allowSnippetAnnotations: false

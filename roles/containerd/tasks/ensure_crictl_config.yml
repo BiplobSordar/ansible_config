@@ -1,0 +1,14 @@
+---
+- name: Check crictl config exists
+  ansible.builtin.stat:
+    path: "{{ crictl_config_path }}"
+  register: crictl_config
+
+- name: Create crictl config
+  ansible.builtin.template:
+    src: crictl.yaml.j2
+    dest: "{{ crictl_config_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: not crictl_config.stat.exists

@@ -1,0 +1,69 @@
+---
+###############################################################################
+# Kubernetes
+###############################################################################
+
+validation_admin_conf_path: /etc/kubernetes/admin.conf
+
+
+validation_fail_fast: true
+
+
+###############################################################################
+# CoreDNS
+###############################################################################
+
+validation_coredns_min_ready: 1
+
+
+
+###############################################################################
+# Static Pods
+###############################################################################
+
+validation_required_static_pods:
+
+  - kube-apiserver
+
+  - kube-controller-manager
+
+  - kube-scheduler
+
+  - etcd
+
+
+
+###############################################################################
+# Monitoring
+###############################################################################
+
+validation_monitoring_namespace: monitoring
+
+
+
+validation_monitoring_deployments:
+
+
+  - kube-prometheus-stack-grafana
+
+  - kube-prometheus-stack-operator
+
+  - kube-prometheus-stack-kube-state-metrics
+
+
+
+validation_monitoring_statefulsets:
+
+
+  - prometheus-kube-prometheus-stack-prometheus
+
+  - alertmanager-kube-prometheus-stack-alertmanager
+
+  - loki
+
+
+
+validation_monitoring_daemonsets:
+
+
+  - promtail

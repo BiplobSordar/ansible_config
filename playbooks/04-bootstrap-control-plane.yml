@@ -1,0 +1,11 @@
+---
+- name: Bootstrap Kubernetes Cluster
+  hosts: bootstrap
+
+  gather_facts: true
+  any_errors_fatal: true
+
+  roles:
+    - role: bootstrap_control_plane
+      tags:
+        - bootstrap

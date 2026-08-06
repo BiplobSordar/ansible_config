@@ -1,0 +1,82 @@
+---
+###############################################################################
+# Configure kubectl
+#
+# After kubeadm join, Kubernetes creates:
+#
+#   /etc/kubernetes/admin.conf
+#
+# This task:
+#
+#   • Verifies admin.conf exists
+#   • Creates /root/.kube
+#   • Installs kubeconfig
+#   • Verifies kubectl is functional
+#
+# Safe to execute multiple times.
+###############################################################################
+
+################################################################################
+# Verify admin.conf exists
+################################################################################
+
+- name: Check admin.conf exists
+  ansible.builtin.stat:
+    path: "{{ join_admin_conf_path }}"
+  register: admin_conf
+
+- name: Assert admin.conf exists
+  ansible.builtin.assert:
+    that:
+      - admin_conf.stat.exists
+    fail_msg: >
+      {{ join_admin_conf_path }} does not exist.
+
+      This control-plane node has not successfully joined the cluster.
+    success_msg: "admin.conf found."
+
+################################################################################
+# Create kubeconfig directory
+################################################################################
+
+- name: Ensure root kubeconfig directory exists
+  ansible.builtin.file:
+    path: /root/.kube
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+################################################################################
+# Install kubeconfig
+################################################################################
+
+- name: Install admin kubeconfig
+  ansible.builtin.copy:
+    src: "{{ join_admin_conf_path }}"
+    dest: /root/.kube/config
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0600"
+
+################################################################################
+# Verify kubectl
+################################################################################
+
+- name: Verify kubectl can access the cluster
+  ansible.builtin.command:
+    cmd: >
+      kubectl
+      --kubeconfig={{ join_admin_conf_path }}
+      get nodes
+  register: kubectl_verify
+  changed_when: false
+
+################################################################################
+# Report success
+################################################################################
+
+- name: Report kubectl configuration
+  ansible.builtin.debug:
+    msg: "kubectl configured successfully on {{ inventory_hostname }}."

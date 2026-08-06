@@ -1,0 +1,62 @@
+---
+
+- name: Check etcd health
+
+
+  ansible.builtin.command:
+
+
+    cmd: >
+
+      kubectl
+
+      --kubeconfig={{ validation_admin_conf_path }}
+
+      -n kube-system
+
+      exec etcd-{{ inventory_hostname }}
+
+      --
+
+      etcdctl
+
+      --endpoints=https://127.0.0.1:2379
+
+      --cacert=/etc/kubernetes/pki/etcd/ca.crt
+
+      --cert=/etc/kubernetes/pki/etcd/server.crt
+
+      --key=/etc/kubernetes/pki/etcd/server.key
+
+      endpoint health
+
+
+
+  register: etcd_health
+
+
+  changed_when: false
+
+
+
+- name: Validate etcd
+
+
+  ansible.builtin.assert:
+
+
+    that:
+
+
+      - "'healthy' in etcd_health.stdout"
+
+
+    fail_msg:
+
+      "etcd unhealthy"
+
+
+
+    success_msg:
+
+      "etcd healthy"

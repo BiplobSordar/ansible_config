@@ -1,0 +1,76 @@
+---
+###############################################################################
+# Install Kubernetes Platform Components
+#
+# Runs ONLY on bootstrap control-plane node.
+#
+# Installs:
+#
+#   - Ingress NGINX
+#   - Metrics Server
+#   - cert-manager
+#   - AWS EBS CSI Driver
+#   - Cluster Autoscaler
+#   - Argo CD
+#
+###############################################################################
+
+
+- name: Install Kubernetes Platform Components
+
+  hosts: bootstrap
+
+  become: true
+
+  gather_facts: true
+
+
+  pre_tasks:
+
+
+    - name: Verify Kubernetes API access
+
+      ansible.builtin.command:
+
+        cmd: >
+          kubectl
+          --kubeconfig=/etc/kubernetes/admin.conf
+          get nodes
+
+
+      register: kubectl_check
+
+
+      changed_when: false
+
+
+
+    - name: Fail if Kubernetes API is unavailable
+
+      ansible.builtin.assert:
+
+        that:
+
+          - kubectl_check.rc == 0
+
+
+        fail_msg:
+
+          - "Cannot access Kubernetes API."
+
+          - "Cluster bootstrap must complete first."
+
+
+
+  roles:
+
+
+    - role: install_platform
+
+
+  tags:
+
+
+    - platform
+
+    - helm_charts

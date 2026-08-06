@@ -1,0 +1,52 @@
+---
+# roles/install_cni/tasks/main.yml
+
+- name: Verify admin kubeconfig exists
+  ansible.builtin.stat:
+    path: "{{ admin_kubeconfig_path }}"
+  register: admin_conf
+
+- name: Fail if admin kubeconfig is missing
+  ansible.builtin.assert:
+    that:
+      - admin_conf.stat.exists
+    fail_msg: >
+      {{ admin_kubeconfig_path }} not found.
+      kubeadm init has probably not completed successfully.
+
+- name: Wait until Kubernetes API Server is reachable
+  ansible.builtin.command:
+    cmd: >
+      kubectl --kubeconfig={{ admin_kubeconfig_path }} cluster-info
+  register: api_server
+  changed_when: false
+  retries: 30
+  delay: 10
+  until: api_server.rc == 0
+
+- name: Download Calico manifest
+  ansible.builtin.get_url:
+    url: "{{ calico_manifest_url }}"
+    dest: "{{ cni_manifest_dest }}"
+    mode: "0644"
+    force: false
+
+- name: Install Calico
+  kubernetes.core.k8s:
+    kubeconfig: "{{ admin_kubeconfig_path }}"
+    state: present
+    src: "{{ cni_manifest_dest }}"
+
+- name: Wait until Calico DaemonSet rollout completes
+  ansible.builtin.command:
+    cmd: >
+      kubectl
+      --kubeconfig={{ admin_kubeconfig_path }}
+      rollout status daemonset/calico-node
+      -n kube-system
+      --timeout=300s
+  register: calico_rollout
+  changed_when: false
+
+- name: Wait until all cluster nodes become Ready
+  ansible.builtin.include_tasks: wait_for_all_ready.yml

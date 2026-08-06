@@ -1,0 +1,11 @@
+---
+- name: Install Calico CNI
+  hosts: bootstrap
+
+  gather_facts: true
+  any_errors_fatal: true
+
+  roles:
+    - role: cni
+      tags:
+        - cni

@@ -1,0 +1,98 @@
+---
+###############################################################################
+# AWS EC2 Dynamic Inventory
+#
+# Production Dynamic Inventory
+# Kubernetes Cluster on AWS
+###############################################################################
+
+plugin: amazon.aws.aws_ec2
+
+###############################################################################
+# AWS Region
+###############################################################################
+
+regions:
+  - ap-southeast-1
+
+###############################################################################
+# EC2 Discovery
+###############################################################################
+
+filters:
+  instance-state-name: running
+  tag:Project: "k8s"
+  tag:Environment: "pr"
+
+###############################################################################
+# Host Variables
+###############################################################################
+
+compose:
+
+  #########################################################################
+  # SSH
+  #########################################################################
+
+  ansible_host: private_ip_address
+
+  #########################################################################
+  # EC2 Metadata
+  #########################################################################
+
+  instance_id: instance_id
+  private_ip: private_ip_address
+  public_ip: public_ip_address | default("")
+  availability_zone: placement.availability_zone
+
+  #########################################################################
+  # AWS Tags
+  #########################################################################
+
+  instance_name: tags.Name | default("")
+  project: tags.Project | default("")
+  environment: tags.Environment | default("")
+  cluster: tags.Cluster | default("")
+  role: tags.Role | default("")
+  managed_by: tags.ManagedBy | default("")
+  bootstrap: tags.Bootstrap | default("false")
+
+###############################################################################
+# Hostname
+#
+# IMPORTANT:
+# Do NOT use tag:Name because ASG workers have duplicate Name tags.
+###############################################################################
+
+hostnames:
+  - instance-id
+
+###############################################################################
+# Dynamic Groups
+###############################################################################
+
+keyed_groups:
+
+  - key: tags.Role
+    prefix: role
+    separator: "_"
+
+  - key: tags.Environment
+    prefix: env
+    separator: "_"
+
+###############################################################################
+# Inventory Options
+###############################################################################
+
+strict: false
+
+cache: true
+
+cache_plugin: jsonfile
+
+cache_connection: .ansible_cache/aws_ec2
+
+cache_timeout: 300
+
+cache_prefix: aws_ec2

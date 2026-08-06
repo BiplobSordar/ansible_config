@@ -1,0 +1,25 @@
+---
+galaxy_info:
+
+  role_name: install_platform
+
+  author: Platform Engineering
+
+  description: >
+    Installs Kubernetes platform services using Helm.
+    Includes ingress-nginx, metrics-server,
+    cert-manager, AWS EBS CSI driver,
+    cluster autoscaler and Argo CD.
+
+  license: Apache-2.0
+
+  min_ansible_version: "2.15"
+
+  platforms:
+
+    - name: Ubuntu
+      versions:
+        - "26.04"
+
+
+dependencies: []

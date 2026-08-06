@@ -1,0 +1,20 @@
+---
+# roles/common/tasks/verify_sysctl.yml
+
+- name: Read sysctl values
+  ansible.builtin.command:
+    cmd: "sysctl -n {{ item.key }}"
+  register: sysctl_values
+  changed_when: false
+  loop: "{{ common_expected_sysctl | dict2items }}"
+
+- name: Assert sysctl configuration
+  ansible.builtin.assert:
+    that:
+      - item.stdout == item.item.value
+    fail_msg: >
+      {{ item.item.key }}
+      expected {{ item.item.value }}
+      got {{ item.stdout }}
+    success_msg: "{{ item.item.key }} verified."
+  loop: "{{ sysctl_values.results }}"

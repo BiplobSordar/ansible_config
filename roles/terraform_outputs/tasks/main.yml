@@ -1,0 +1,32 @@
+---
+- name: Verify Terraform outputs file exists
+  ansible.builtin.stat:
+    path: "{{ terraform_outputs_file }}"
+  register: terraform_outputs
+
+- name: Fail if outputs.json is missing
+  ansible.builtin.fail:
+    msg: "Terraform outputs file not found: {{ terraform_outputs_file }}"
+  when: not terraform_outputs.stat.exists
+
+- name: Read Terraform outputs
+  ansible.builtin.slurp:
+    src: "{{ terraform_outputs_file }}"
+  register: terraform_outputs_raw
+
+- name: Parse Terraform outputs
+  ansible.builtin.set_fact:
+    terraform_outputs_data: >-
+      {{
+        terraform_outputs_raw.content
+        | b64decode
+        | from_json
+      }}
+
+- name: Export Terraform variables
+  ansible.builtin.set_fact:
+
+    aws_region: "{{ terraform_outputs_data.aws_region.value }}"
+    cluster_name: "{{ terraform_outputs_data.cluster_name.value }}"
+    control_plane_endpoint: "{{ terraform_outputs_data.control_plane_endpoint.value }}"
+    vpc_id: "{{ terraform_outputs_data.vpc_id.value }}"

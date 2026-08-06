@@ -1,0 +1,22 @@
+---
+###############################################################################
+# Final Cluster Validation
+###############################################################################
+
+- name: Validate Kubernetes Cluster
+
+  hosts: bootstrap
+
+  become: true
+
+  gather_facts: true
+
+
+  roles:
+
+    - role: validation
+
+
+  tags:
+
+    - validation

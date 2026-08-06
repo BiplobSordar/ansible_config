@@ -1,0 +1,2 @@
+---
+terraform_outputs_file: "{{ playbook_dir }}/terraform/outputs.json"

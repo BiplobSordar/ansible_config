@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+# controller.serviceAccount.annotations should point at the IAM role created
+# by Terraform (IRSA-equivalent role/instance-profile for EBS CSI).
+controller:
+  serviceAccount:
+    create: true
+    name: ebs-csi-controller-sa
+storageClasses:
+  - name: gp3
+    annotations:
+      storageclass.kubernetes.io/is-default-class: "true"
+    volumeBindingMode: WaitForFirstConsumer
+    parameters:
+      type: gp3
+      encrypted: "true"

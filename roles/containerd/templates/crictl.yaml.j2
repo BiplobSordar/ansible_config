@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+# crictl configuration - created by the containerd role because this file
+# was missing on first run. Never overwritten once present.
+runtime-endpoint: "{{ crictl_runtime_endpoint }}"
+image-endpoint: "{{ crictl_image_endpoint }}"
+timeout: {{ crictl_timeout_seconds }}
+debug: false
+pull-image-on-create: false

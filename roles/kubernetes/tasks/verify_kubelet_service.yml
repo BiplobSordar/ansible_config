@@ -1,0 +1,23 @@
+---
+# roles/kubernetes/tasks/verify_kubelet_service.yml
+
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Assert kubelet service exists
+  ansible.builtin.assert:
+    that:
+      - (kubelet_service_name + '.service') in ansible_facts.services
+    fail_msg: kubelet.service not found.
+
+- name: Assert kubelet service is enabled
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.services[kubelet_service_name + '.service'].status == "enabled"
+    fail_msg: kubelet.service is not enabled.
+
+- name: Show kubelet state
+  ansible.builtin.debug:
+    msg: >
+      kubelet.service state:
+      {{ ansible_facts.services[kubelet_service_name + '.service'].state }}

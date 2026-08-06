@@ -1,0 +1,4 @@
+---
+# roles/common/handlers/main.yml
+# The common role is verify-only and intentionally defines no handlers.
+# Present for structural consistency across roles.

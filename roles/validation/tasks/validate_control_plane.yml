@@ -1,0 +1,67 @@
+---
+
+- name: Get control plane nodes
+
+  ansible.builtin.command:
+
+    cmd: >
+
+      kubectl
+
+      --kubeconfig={{ validation_admin_conf_path }}
+
+      get nodes
+
+
+  register: cp_nodes
+
+
+  changed_when: false
+
+
+
+- name: Validate static pods
+
+
+  ansible.builtin.command:
+
+    cmd: >
+
+      kubectl
+
+      --kubeconfig={{ validation_admin_conf_path }}
+
+      get pods
+
+      -n kube-system
+
+      -l component={{ item }}
+
+  loop: "{{ validation_required_static_pods }}"
+
+
+  register: static_pods
+
+
+  changed_when: false
+
+
+
+- name: Assert static pods exist
+
+
+  ansible.builtin.assert:
+
+
+    that:
+
+
+      - item.stdout | length > 0
+
+
+    fail_msg:
+
+      "Static pod {{ item.item }} missing"
+
+
+  loop: "{{ static_pods.results }}"

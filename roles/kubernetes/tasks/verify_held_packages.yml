@@ -1,0 +1,36 @@
+---
+# roles/kubernetes/tasks/verify_held_packages.yml
+
+- name: Build expected held package list
+  ansible.builtin.set_fact:
+    kubernetes_expected_held: >-
+      {{
+        kubernetes_held_packages_common
+        +
+        (
+          kubernetes_held_packages_control_plane_extra
+          if kubectl_expected | default(false)
+          else []
+        )
+      }}
+
+- name: Query dpkg selections
+  ansible.builtin.command:
+    cmd: dpkg --get-selections {{ item }}
+  loop: "{{ kubernetes_expected_held }}"
+  register: dpkg_selections
+  changed_when: false
+  failed_when: false
+
+- name: Assert package exists
+  ansible.builtin.assert:
+    that:
+      - item.rc == 0
+      - "'hold' in item.stdout"
+    fail_msg: >
+      {{ item.item }}
+      is not apt-mark hold.
+    success_msg: >
+      Verified hold:
+      {{ item.item }}
+  loop: "{{ dpkg_selections.results }}"

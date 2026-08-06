@@ -1,0 +1,25 @@
+---
+# roles/common/tasks/verify_chrony.yml
+
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Assert chrony running
+  ansible.builtin.assert:
+    that:
+      - "'chrony.service' in ansible_facts.services"
+      - ansible_facts.services['chrony.service'].state == 'running'
+    fail_msg: "Chrony service not running."
+    success_msg: "Chrony running."
+
+- name: Verify NTP synchronization
+  ansible.builtin.command: chronyc tracking
+  register: chrony_tracking
+  changed_when: false
+
+- name: Assert Leap status normal
+  ansible.builtin.assert:
+    that:
+      - "'Leap status     : Normal' in chrony_tracking.stdout"
+    fail_msg: "System clock not synchronized."
+    success_msg: "Time synchronization verified."

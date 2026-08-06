@@ -1,0 +1,100 @@
+---
+###############################################################################
+# Wait for Kubernetes API Server
+#
+# This task waits until the bootstrap control-plane node has completely
+# started the Kubernetes API Server and registered itself with the cluster.
+#
+# Safe to execute multiple times.
+###############################################################################
+
+################################################################################
+# Wait for kube-apiserver health endpoint
+################################################################################
+
+- name: Wait for Kubernetes API server to become healthy
+  ansible.builtin.command:
+    cmd: >
+      kubectl
+      --kubeconfig={{ bootstrap_admin_conf_path }}
+      get --raw=/healthz
+
+  register: api_health
+
+  changed_when: false
+
+  retries: "{{ bootstrap_api_wait_retries }}"
+
+  delay: "{{ bootstrap_api_wait_delay }}"
+
+  until:
+    - api_health.rc == 0
+    - api_health.stdout | trim == "ok"
+
+################################################################################
+# Wait until bootstrap node appears in the cluster
+################################################################################
+
+- name: Wait for bootstrap node registration
+  ansible.builtin.command:
+    cmd: >
+      kubectl
+      --kubeconfig={{ bootstrap_admin_conf_path }}
+      get node {{ inventory_hostname }}
+
+  register: bootstrap_node
+
+  changed_when: false
+
+  retries: "{{ bootstrap_api_wait_retries }}"
+
+  delay: "{{ bootstrap_api_wait_delay }}"
+
+  until: bootstrap_node.rc == 0
+
+################################################################################
+# Wait until bootstrap node becomes Ready
+################################################################################
+
+- name: Wait until bootstrap node is Ready
+  ansible.builtin.command:
+    cmd: >
+      kubectl
+      --kubeconfig={{ bootstrap_admin_conf_path }}
+      get node {{ inventory_hostname }}
+      -o jsonpath={.status.conditions[?(@.type=="Ready")].status}
+
+  register: bootstrap_ready
+
+  changed_when: false
+
+  retries: "{{ bootstrap_api_wait_retries }}"
+
+  delay: "{{ bootstrap_api_wait_delay }}"
+
+  until:
+    - bootstrap_ready.rc == 0
+    - bootstrap_ready.stdout == "True"
+
+################################################################################
+# Display node information
+################################################################################
+
+- name: Display bootstrap node status
+  ansible.builtin.command:
+    cmd: >
+      kubectl
+      --kubeconfig={{ bootstrap_admin_conf_path }}
+      get nodes -o wide
+
+  register: node_status
+
+  changed_when: false
+
+################################################################################
+# Report success
+################################################################################
+
+- name: Report API server health
+  ansible.builtin.debug:
+    var: node_status.stdout_lines

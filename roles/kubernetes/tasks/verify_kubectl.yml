@@ -1,0 +1,42 @@
+---
+# roles/kubernetes/tasks/verify_kubectl.yml
+
+- name: Check kubectl binary exists
+  ansible.builtin.stat:
+    path: "{{ kubernetes_binary_path }}/kubectl"
+  register: kubectl_binary
+
+- name: Assert kubectl binary exists
+  ansible.builtin.assert:
+    that:
+      - kubectl_binary.stat.exists
+    fail_msg: >
+      kubectl not found on control-plane node.
+
+- name: Query kubectl version
+  ansible.builtin.command:
+    cmd: kubectl version --client -o json
+  register: kubectl_version_raw
+  changed_when: false
+
+- name: Parse kubectl version
+  ansible.builtin.set_fact:
+    kubectl_version_parsed: >-
+      {{
+        (
+          kubectl_version_raw.stdout
+          | from_json
+        ).clientVersion.gitVersion
+        | regex_replace('^v','')
+      }}
+
+- name: Assert kubectl version
+  ansible.builtin.assert:
+    that:
+      - kubectl_version_parsed is version(kubernetes_expected_version,'==')
+    fail_msg: >
+      kubectl version {{ kubectl_version_parsed }}
+      does not match {{ kubernetes_expected_version }}
+    success_msg: >
+      kubectl version verified:
+      {{ kubectl_version_parsed }}

@@ -1,0 +1,19 @@
+# {{ ansible_managed }}
+global:
+  domain: "argocd.{{ cluster_name }}.internal"
+configs:
+  params:
+    server.insecure: false
+server:
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+redis-ha:
+  enabled: false
+controller:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi

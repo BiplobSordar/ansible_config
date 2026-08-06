@@ -1,0 +1,4 @@
+---
+# roles/common/vars/main.yml
+# Internal, non-overridable constants for the common role.
+common_role_name: common

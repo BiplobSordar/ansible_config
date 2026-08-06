@@ -1,0 +1,26 @@
+---
+# roles/common/tasks/verify_swap.yml
+
+- name: Read swap total
+  ansible.builtin.command: awk '/SwapTotal/ {print $2}' /proc/meminfo
+  register: swap_total
+  changed_when: false
+
+- name: Assert swap disabled
+  ansible.builtin.assert:
+    that:
+      - swap_total.stdout | int == common_expected_swap_kb
+    fail_msg: "Swap is enabled."
+    success_msg: "Swap disabled."
+
+- name: Verify swap not present in fstab
+  ansible.builtin.command: grep -v '^#' /etc/fstab
+  register: fstab
+  changed_when: false
+
+- name: Assert fstab contains no swap entries
+  ansible.builtin.assert:
+    that:
+      - "' swap ' not in fstab.stdout"
+    fail_msg: "Swap entry exists inside /etc/fstab."
+    success_msg: "fstab verified."

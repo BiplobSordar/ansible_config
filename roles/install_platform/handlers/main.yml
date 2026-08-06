@@ -1,0 +1,4 @@
+---
+# roles/install_helm/handlers/main.yml
+# Helm releases are managed declaratively via kubernetes.core.helm; no
+# additional handlers are required.

@@ -1,0 +1,15 @@
+---
+###############################################################################
+# Install Platform Defaults
+###############################################################################
+
+# kubeconfig exists only on bootstrap/control-plane node
+platform_kubeconfig: "/etc/kubernetes/admin.conf"
+
+
+# Temporary Helm values location
+platform_values_dir: "/etc/kubernetes/platform-values"
+
+
+# Enable installation
+install_platform_components: true

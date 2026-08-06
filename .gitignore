@@ -1,0 +1,15 @@
+# Runtime-generated cluster secrets/artifacts - never commit
+.cluster-artifacts/
+.ansible_cache/
+*.retry
+
+# Ansible Galaxy installed collections (installed via requirements.yml)
+collections/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS/editor cruft
+.DS_Store
+*.swp

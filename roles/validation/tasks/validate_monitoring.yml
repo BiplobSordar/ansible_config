@@ -1,0 +1,133 @@
+---
+
+###############################################################################
+# Monitoring Namespace
+###############################################################################
+
+
+- name: Check monitoring namespace
+
+
+  kubernetes.core.k8s_info:
+
+
+    kubeconfig: "{{ validation_admin_conf_path }}"
+
+
+    kind: Namespace
+
+
+    name: "{{ validation_monitoring_namespace }}"
+
+
+  register: monitoring_ns
+
+
+
+- name: Validate monitoring namespace
+
+
+  ansible.builtin.assert:
+
+
+    that:
+
+
+      - monitoring_ns.resources | length == 1
+
+
+
+
+###############################################################################
+# Deployments
+###############################################################################
+
+
+- name: Check monitoring deployments
+
+
+  kubernetes.core.k8s_info:
+
+
+    kubeconfig: "{{ validation_admin_conf_path }}"
+
+
+    api_version: apps/v1
+
+
+    kind: Deployment
+
+
+    namespace: monitoring
+
+
+    name: "{{ item }}"
+
+
+  loop: "{{ validation_monitoring_deployments }}"
+
+
+  register: monitoring_deployments
+
+
+
+- name: Validate deployments ready
+
+
+  ansible.builtin.assert:
+
+
+    that:
+
+
+      - item.resources | length > 0
+
+      - item.resources[0].status.readyReplicas | default(0) | int > 0
+
+
+  loop: "{{ monitoring_deployments.results }}"
+
+
+
+
+###############################################################################
+# DaemonSet Promtail
+###############################################################################
+
+
+- name: Check Promtail
+
+
+  kubernetes.core.k8s_info:
+
+
+    kubeconfig: "{{ validation_admin_conf_path }}"
+
+
+    api_version: apps/v1
+
+
+    kind: DaemonSet
+
+
+    namespace: monitoring
+
+
+    name: promtail
+
+
+
+  register: promtail
+
+
+
+- name: Validate Promtail
+
+
+  ansible.builtin.assert:
+
+
+    that:
+
+
+      - promtail.resources[0].status.numberReady | int > 0

@@ -1,0 +1,85 @@
+###############################################################################
+# Validate stacked etcd
+###############################################################################
+
+
+- name: Wait etcd pod
+
+  command:
+
+    cmd:
+
+      kubectl
+      --kubeconfig={{ join_admin_conf_path }}
+      -n kube-system
+      get pod
+      etcd-{{ ansible_hostname }}
+      -o jsonpath={.status.phase}
+
+
+  register: etcd_phase
+
+
+  changed_when: false
+
+
+  retries: "{{ join_etcd_wait_retries }}"
+
+  delay: "{{ join_etcd_wait_delay }}"
+
+
+  until:
+
+    - etcd_phase.stdout == "Running"
+
+
+
+- name: Get etcd members
+
+
+  command:
+
+    cmd: >
+
+      kubectl
+      --kubeconfig={{ join_admin_conf_path }}
+      -n kube-system
+      exec
+      etcd-{{ ansible_hostname }}
+      -c etcd
+      --
+      etcdctl
+      --endpoints=https://127.0.0.1:2379
+      --cacert=/etc/kubernetes/pki/etcd/ca.crt
+      --cert=/etc/kubernetes/pki/etcd/server.crt
+      --key=/etc/kubernetes/pki/etcd/server.key
+      member list
+
+
+
+  register: etcd_members
+
+
+  changed_when: false
+
+
+
+- name: Verify etcd member
+
+  assert:
+
+
+    that:
+
+      - ansible_hostname in etcd_members.stdout
+
+
+    fail_msg:
+
+      "This control plane node is not registered in etcd"
+
+
+
+    success_msg:
+
+      "etcd membership verified for {{ ansible_hostname }}"

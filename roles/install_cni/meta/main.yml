@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  role_name: install_cni
+  author: Platform Engineering
+  description: >
+    Installs the Calico CNI via the official manifest (kubectl apply,
+    idempotent) and waits for all currently registered nodes to become Ready.
+  license: Apache-2.0
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - "26.04"
+dependencies: []

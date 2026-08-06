@@ -1,0 +1,27 @@
+---
+###############################################################################
+# Monitoring Installation
+###############################################################################
+
+
+- name: Add monitoring Helm repositories
+
+  ansible.builtin.include_tasks:
+
+    file: repositories.yml
+
+
+
+- name: Create monitoring values
+
+  ansible.builtin.include_tasks:
+
+    file: values.yml
+
+
+
+- name: Install monitoring charts
+
+  ansible.builtin.include_tasks:
+
+    file: charts.yml

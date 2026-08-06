@@ -1,0 +1,21 @@
+---
+###############################################################################
+# Add Helm Chart Repositories
+###############################################################################
+
+
+- name: Add Kubernetes platform Helm repositories
+
+  kubernetes.core.helm_repository:
+
+    name: "{{ item.value.name }}"
+
+    repo_url: "{{ item.value.url }}"
+
+
+  loop: "{{ helm_repositories | dict2items }}"
+
+
+  loop_control:
+
+    label: "{{ item.value.name }}"

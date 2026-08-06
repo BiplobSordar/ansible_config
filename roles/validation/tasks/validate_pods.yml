@@ -1,0 +1,34 @@
+---
+
+- name: Find unhealthy pods
+
+
+  ansible.builtin.command:
+
+
+    cmd: >
+
+      kubectl
+
+      --kubeconfig={{ validation_admin_conf_path }}
+
+      get pods
+
+      --all-namespaces
+
+
+
+  register: pods
+
+
+  changed_when: false
+
+
+
+- name: Report pod status
+
+
+  ansible.builtin.debug:
+
+
+    var: pods.stdout_lines

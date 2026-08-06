@@ -1,0 +1,27 @@
+---
+# roles/kubernetes/tasks/main.yml
+#
+# kubeadm and kubelet are ALREADY INSTALLED by the Golden AMI (kubectl too,
+# on control-plane nodes only). This role verifies versions, apt-hold state,
+# and the kubelet service. It never installs or upgrades these packages.
+
+- name: Verify kubeadm version
+  ansible.builtin.include_tasks: verify_kubeadm.yml
+  tags: [kubernetes, verify, kubeadm]
+
+- name: Verify kubelet version
+  ansible.builtin.include_tasks: verify_kubelet.yml
+  tags: [kubernetes, verify, kubelet]
+
+- name: Verify kubectl version (control-plane nodes only)
+  ansible.builtin.include_tasks: verify_kubectl.yml
+  when: kubectl_expected | default(false)
+  tags: [kubernetes, verify, kubectl]
+
+- name: Verify apt packages are held (pinned)
+  ansible.builtin.include_tasks: verify_held_packages.yml
+  tags: [kubernetes, verify, hold]
+
+- name: Verify kubelet service state
+  ansible.builtin.include_tasks: verify_kubelet_service.yml
+  tags: [kubernetes, verify, service]

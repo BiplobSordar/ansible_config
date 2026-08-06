@@ -1,0 +1,50 @@
+---
+
+- name: Check CoreDNS
+
+
+  ansible.builtin.command:
+
+
+    cmd: >
+
+      kubectl
+
+      --kubeconfig={{ validation_admin_conf_path }}
+
+      -n kube-system
+
+      get deployment coredns
+
+      -o jsonpath='{.status.readyReplicas}'
+
+
+
+  register: coredns
+
+
+  changed_when: false
+
+
+
+- name: Validate CoreDNS
+
+
+  ansible.builtin.assert:
+
+
+    that:
+
+
+      - coredns.stdout | int >= validation_coredns_min_ready
+
+
+
+    fail_msg:
+
+      "CoreDNS unhealthy"
+
+
+    success_msg:
+
+      "CoreDNS healthy"

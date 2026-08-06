@@ -1,0 +1,73 @@
+---
+###############################################################################
+# Kubernetes Platform Installation
+###############################################################################
+
+
+- name: Verify Helm installation
+
+  ansible.builtin.command:
+
+    cmd: helm version
+
+
+  register: helm_check
+
+
+  changed_when: false
+
+
+
+- name: Fail if Helm is missing
+
+  ansible.builtin.assert:
+
+    that:
+
+      - helm_check.rc == 0
+
+    fail_msg:
+
+      - "Helm is not installed."
+
+      - "Run install_helm role first."
+
+
+
+- name: Create platform values directory
+
+  ansible.builtin.file:
+
+    path: "{{ platform_values_dir }}"
+
+    state: directory
+
+    owner: root
+
+    group: root
+
+    mode: "0755"
+
+
+
+- name: Configure Helm repositories
+
+  ansible.builtin.include_tasks:
+
+    file: repositories.yml
+
+
+
+- name: Generate Helm values files
+
+  ansible.builtin.include_tasks:
+
+    file: values.yml
+
+
+
+- name: Deploy Kubernetes platform charts
+
+  ansible.builtin.include_tasks:
+
+    file: charts.yml

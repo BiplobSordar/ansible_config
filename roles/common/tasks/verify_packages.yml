@@ -1,0 +1,32 @@
+---
+# roles/common/tasks/verify_packages.yml
+
+- name: Gather installed packages
+  ansible.builtin.package_facts:
+    manager: apt
+
+- name: Assert required packages installed
+  ansible.builtin.assert:
+    that:
+      - item in ansible_facts.packages
+    fail_msg: "{{ item }} missing."
+    success_msg: "{{ item }} installed."
+  loop: "{{ common_expected_packages }}"
+
+- name: Assert kubeadm version
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.packages['kubeadm'][0].version is search(expected_kubeadm_version)
+    fail_msg: "Incorrect kubeadm version."
+
+- name: Assert kubelet version
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.packages['kubelet'][0].version is search(expected_kubelet_version)
+    fail_msg: "Incorrect kubelet version."
+
+- name: Assert containerd version
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.packages['containerd.io'][0].version is search(expected_containerd_version)
+    fail_msg: "Incorrect containerd version."

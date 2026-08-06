@@ -1,0 +1,13 @@
+---
+- name: Join Remaining Control Plane Nodes
+  hosts: control_plane:!bootstrap
+
+  gather_facts: true
+  any_errors_fatal: true
+
+  serial: 1
+
+  roles:
+    - role: join_control_plane
+      tags:
+        - join-control-plane

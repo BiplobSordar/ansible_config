@@ -1,0 +1,39 @@
+---
+galaxy_info:
+
+  role_name: bootstrap_control_plane
+
+  author: Platform Engineering
+
+  description: >
+    Bootstraps the first Kubernetes control-plane node using kubeadm,
+    configures kubectl, waits for the API server to become healthy,
+    generates fresh worker and control-plane join credentials,
+    and exports cluster artifacts for subsequent Ansible roles.
+
+  company: Internal
+
+  license: Apache-2.0
+
+  min_ansible_version: "2.15"
+
+  platforms:
+
+    - name: Ubuntu
+
+      versions:
+
+        - "26.04"
+
+  galaxy_tags:
+
+    - kubernetes
+    - kubeadm
+    - control-plane
+    - bootstrap
+    - containerd
+    - aws
+    - production
+    - high-availability
+
+dependencies: []

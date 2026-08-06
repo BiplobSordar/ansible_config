@@ -1,0 +1,13 @@
+---
+- name: Join Worker Nodes
+  hosts: workers
+
+  gather_facts: true
+  any_errors_fatal: true
+
+  serial: 30%
+
+  roles:
+    - role: worker
+      tags:
+        - worker

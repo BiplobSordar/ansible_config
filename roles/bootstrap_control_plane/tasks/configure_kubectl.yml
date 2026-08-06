@@ -1,0 +1,56 @@
+---
+###############################################################################
+# Configure kubectl
+#
+# After kubeadm init completes, Kubernetes generates admin.conf.
+#
+# This task:
+#
+#   • Creates /root/.kube
+#   • Installs admin.conf as /root/.kube/config
+#   • Verifies kubectl can communicate with the API server
+#
+# Safe to run multiple times.
+###############################################################################
+
+################################################################################
+# Ensure kubeconfig directory exists
+################################################################################
+
+- name: Ensure root kubeconfig directory exists
+  ansible.builtin.file:
+    path: /root/.kube
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+################################################################################
+# Install kubeconfig
+################################################################################
+
+- name: Install admin kubeconfig
+  ansible.builtin.copy:
+    src: "{{ bootstrap_admin_conf_path }}"
+    dest: /root/.kube/config
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0600"
+
+################################################################################
+# Verify kubectl configuration
+################################################################################
+
+- name: Verify kubectl can communicate with the API server
+  ansible.builtin.command:
+    cmd: kubectl --kubeconfig={{ bootstrap_admin_conf_path }} version --client
+  changed_when: false
+
+################################################################################
+# Report success
+################################################################################
+
+- name: Report kubectl configuration
+  ansible.builtin.debug:
+    msg: "kubectl has been configured successfully on the bootstrap control-plane node."

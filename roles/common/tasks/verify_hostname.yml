@@ -1,0 +1,15 @@
+---
+# roles/common/tasks/verify_hostname.yml
+
+- name: Read hostname
+  ansible.builtin.command: hostname
+  register: hostname_result
+  changed_when: false
+
+- name: Assert hostname matches Terraform Node tag
+  ansible.builtin.assert:
+    that:
+      - hostname_result.stdout == node_name
+    fail_msg: >
+      Hostname does not match Terraform Node tag.
+    success_msg: "Hostname verified."

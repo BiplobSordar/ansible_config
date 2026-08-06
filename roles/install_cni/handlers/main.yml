@@ -1,0 +1,3 @@
+---
+# roles/install_cni/handlers/main.yml
+# CNI apply is managed declaratively via kubernetes.core.k8s; no handlers needed.

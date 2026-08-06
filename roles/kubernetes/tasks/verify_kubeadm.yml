@@ -1,0 +1,33 @@
+---
+# roles/kubernetes/tasks/verify_kubeadm.yml
+
+- name: Check kubeadm binary exists
+  ansible.builtin.stat:
+    path: "{{ kubernetes_binary_path }}/kubeadm"
+  register: kubeadm_binary
+
+- name: Assert kubeadm binary is present
+  ansible.builtin.assert:
+    that:
+      - kubeadm_binary.stat.exists
+    fail_msg: >
+      kubeadm not found.
+      This role never installs Kubernetes.
+      Verify the Golden AMI.
+
+- name: Query kubeadm version
+  ansible.builtin.command:
+    cmd: kubeadm version -o short
+  register: kubeadm_version_raw
+  changed_when: false
+
+- name: Assert kubeadm version
+  ansible.builtin.assert:
+    that:
+      - kubeadm_version_raw.stdout | regex_replace('^v','') is version(kubernetes_expected_version,'==')
+    fail_msg: >
+      Expected {{ kubernetes_expected_version }}
+      but found {{ kubeadm_version_raw.stdout }}
+    success_msg: >
+      kubeadm version verified:
+      {{ kubeadm_version_raw.stdout }}

@@ -1,0 +1,81 @@
+---
+###############################################################################
+# Store Join Credentials in AWS SSM Parameter Store
+#
+# Terraform creates the SSM parameters.
+# Bootstrap updates their values after kubeadm init.
+#
+# This allows:
+#
+# • Worker nodes
+# • Future control-plane nodes
+# • Jenkins
+# • Auto Scaling Groups
+#
+# to retrieve the latest join credentials.
+###############################################################################
+
+################################################################################
+# Verify required variables exist
+################################################################################
+
+- name: Assert SSM parameter names are provided
+  ansible.builtin.assert:
+    that:
+      - kubeadm_worker_join_parameter is defined
+      - kubeadm_certificate_key_parameter is defined
+    fail_msg: >
+      Missing SSM parameter names.
+      Ensure Terraform outputs are passed into Ansible.
+
+################################################################################
+# Store Worker Join Command
+################################################################################
+
+- name: Store worker join command in AWS SSM
+  amazon.aws.ssm_parameter:
+
+    name: "{{ kubeadm_worker_join_parameter }}"
+
+    description: "Kubernetes Worker Join Command"
+
+    string_type: SecureString
+
+    value: "{{ fact_worker_join_command }}"
+
+    overwrite_value: always
+
+    region: "{{ aws_region }}"
+
+    state: present
+
+################################################################################
+# Store Certificate Key
+################################################################################
+
+- name: Store control-plane certificate key in AWS SSM
+  amazon.aws.ssm_parameter:
+
+    name: "{{ kubeadm_certificate_key_parameter }}"
+
+    description: "Kubernetes Control Plane Certificate Key"
+
+    string_type: SecureString
+
+    value: "{{ fact_certificate_key }}"
+
+    overwrite_value: always
+
+    region: "{{ aws_region }}"
+
+    state: present
+
+################################################################################
+# Report
+################################################################################
+
+- name: Report successful SSM update
+  ansible.builtin.debug:
+    msg:
+      - "Worker join command stored in AWS SSM."
+      - "Certificate key stored in AWS SSM."

@@ -1,0 +1,12 @@
+---
+- name: Gather services
+  ansible.builtin.service_facts:
+
+- name: Assert containerd running
+  ansible.builtin.assert:
+    that:
+      - "'containerd.service' in ansible_facts.services"
+      - ansible_facts.services['containerd.service'].state == "running"
+      - ansible_facts.services['containerd.service'].status == "enabled"
+    fail_msg: >
+      containerd service is not enabled/running.

@@ -1,0 +1,11 @@
+---
+- name: Verify Container Runtime
+  hosts: control_plane:workers
+
+  gather_facts: true
+  any_errors_fatal: true
+
+  roles:
+    - role: containerd
+      tags:
+        - containerd

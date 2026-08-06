@@ -1,0 +1,43 @@
+---
+###############################################################################
+# Bootstrap Control Plane Role - Default Variables
+#
+# These variables control how the first Kubernetes control-plane node is
+# initialized. They may be overridden by inventory, group_vars or extra-vars.
+###############################################################################
+
+# -----------------------------------------------------------------------------
+# kubeadm configuration
+# -----------------------------------------------------------------------------
+
+bootstrap_kubeadm_config_path: /etc/kubernetes/kubeadm-init-config.yaml
+
+bootstrap_admin_conf_path: /etc/kubernetes/admin.conf
+
+bootstrap_marker_path: /etc/kubernetes/.ansible-bootstrap-complete
+
+# -----------------------------------------------------------------------------
+# API Server health check
+# -----------------------------------------------------------------------------
+
+bootstrap_api_wait_retries: 30
+
+bootstrap_api_wait_delay: 10
+
+# -----------------------------------------------------------------------------
+# Join credential generation
+# -----------------------------------------------------------------------------
+
+# Upload control-plane certificates during kubeadm init.
+# Required so additional control-plane nodes can join later.
+bootstrap_upload_certs: true
+
+# -----------------------------------------------------------------------------
+# Artifact paths generated on the bootstrap node
+# -----------------------------------------------------------------------------
+
+bootstrap_worker_join_command_path: /etc/kubernetes/worker-join-command.sh
+
+bootstrap_control_plane_join_command_path: /etc/kubernetes/control-plane-join-command.sh
+
+bootstrap_certificate_key_path: /etc/kubernetes/certificate-key.txt

@@ -1,0 +1,35 @@
+---
+###############################################################################
+# Install Helm CLI
+#
+# Runs ONLY on bootstrap control-plane node.
+#
+# Responsibilities:
+#
+# - Install Helm binary
+# - Verify Helm version
+#
+# Does NOT install Kubernetes applications.
+#
+###############################################################################
+
+
+- name: Install Helm CLI
+
+  hosts: bootstrap
+
+  become: true
+
+  gather_facts: true
+
+
+  roles:
+
+    - role: install_helm
+
+
+  tags:
+
+    - helm
+
+    - helm_cli

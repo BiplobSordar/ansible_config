@@ -1,0 +1,41 @@
+---
+# roles/kubernetes/tasks/verify_kubelet.yml
+
+- name: Check kubelet binary exists
+  ansible.builtin.stat:
+    path: "{{ kubernetes_binary_path }}/kubelet"
+  register: kubelet_binary
+
+- name: Assert kubelet binary exists
+  ansible.builtin.assert:
+    that:
+      - kubelet_binary.stat.exists
+    fail_msg: >
+      kubelet not found.
+      Verify the Golden AMI.
+
+- name: Query kubelet version
+  ansible.builtin.command:
+    cmd: kubelet --version
+  register: kubelet_version_raw
+  changed_when: false
+
+- name: Parse kubelet version
+  ansible.builtin.set_fact:
+    kubelet_version_parsed: >-
+      {{
+        kubelet_version_raw.stdout
+        | regex_search('v([0-9.]+)','\\1')
+        | first
+      }}
+
+- name: Assert kubelet version
+  ansible.builtin.assert:
+    that:
+      - kubelet_version_parsed is version(kubernetes_expected_version,'==')
+    fail_msg: >
+      kubelet version {{ kubelet_version_parsed }}
+      does not match {{ kubernetes_expected_version }}
+    success_msg: >
+      kubelet version verified:
+      {{ kubelet_version_parsed }}

@@ -1,0 +1,3 @@
+---
+# roles/validation/handlers/main.yml
+# Validation is read-only; no handlers required.

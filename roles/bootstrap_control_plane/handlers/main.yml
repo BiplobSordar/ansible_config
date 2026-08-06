@@ -1,0 +1,4 @@
+---
+# roles/bootstrap_control_plane/handlers/main.yml
+# kubeadm init is a one-shot operation guarded by a marker file; no
+# additional service handlers are required here.

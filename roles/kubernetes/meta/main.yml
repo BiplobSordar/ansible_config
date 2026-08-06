@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  role_name: kubernetes
+  author: Platform Engineering
+
+  description: >
+    Verifies the Kubernetes components pre-installed on the Golden AMI,
+    including kubeadm, kubelet, kubectl (control-plane only), apt package
+    hold state, and the kubelet systemd service. This role never installs,
+    upgrades, or configures Kubernetes packages.
+
+  license: Apache-2.0
+
+  min_ansible_version: "2.15"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - "26.04"
+
+dependencies: []

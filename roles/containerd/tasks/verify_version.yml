@@ -1,0 +1,36 @@
+---
+- name: Check containerd binary exists
+  ansible.builtin.stat:
+    path: "{{ containerd_binary_path }}"
+  register: containerd_binary
+
+- name: Assert containerd binary exists
+  ansible.builtin.assert:
+    that:
+      - containerd_binary.stat.exists
+    fail_msg: >
+      containerd binary not found.
+      Golden AMI is invalid.
+
+- name: Get containerd version
+  ansible.builtin.command:
+    cmd: containerd --version
+  register: containerd_version
+  changed_when: false
+
+- name: Parse version
+  ansible.builtin.set_fact:
+    containerd_version_parsed: >-
+      {{
+        containerd_version.stdout
+        | regex_search('([0-9]+\.[0-9]+\.[0-9]+)')
+      }}
+
+- name: Assert version
+  ansible.builtin.assert:
+    that:
+      - containerd_version_parsed is version(containerd_expected_min_version, '>=')
+    fail_msg: >
+      Containerd version {{ containerd_version_parsed }}
+      is below required version
+      {{ containerd_expected_min_version }}

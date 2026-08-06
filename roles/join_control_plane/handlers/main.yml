@@ -1,0 +1,3 @@
+---
+# roles/join_control_plane/handlers/main.yml
+# kubeadm join is one-shot per node, guarded by a marker file; no handlers needed.

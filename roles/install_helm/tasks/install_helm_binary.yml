@@ -1,0 +1,111 @@
+---
+###############################################################################
+# Helm Binary Installation
+###############################################################################
+
+
+- name: Check existing Helm installation
+  ansible.builtin.command:
+
+    cmd: "{{ helm_binary_dest }} version --short"
+
+  register: helm_current_version
+
+  changed_when: false
+
+  failed_when: false
+
+
+
+- name: Determine Helm installation status
+  ansible.builtin.set_fact:
+
+    helm_installed_correctly: >-
+      {{
+        helm_current_version.rc == 0
+        and
+        helm_version in helm_current_version.stdout
+      }}
+
+
+
+- name: Install Helm
+  when: not helm_installed_correctly
+
+  block:
+
+
+    - name: Create Helm temporary directory
+
+      ansible.builtin.file:
+
+        path: "{{ helm_install_tmp_dir }}"
+
+        state: directory
+
+        mode: "0755"
+
+
+
+    - name: Download Helm installer
+
+      ansible.builtin.get_url:
+
+        url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+
+        dest: "{{ helm_install_tmp_dir }}/get-helm-3"
+
+        mode: "0755"
+
+
+
+    - name: Execute Helm installer
+
+      ansible.builtin.command:
+
+        cmd: >
+          {{ helm_install_tmp_dir }}/get-helm-3
+          --version {{ helm_version }}
+
+
+
+###############################################################################
+# Verification
+###############################################################################
+
+
+- name: Verify Helm installation
+
+  ansible.builtin.command:
+
+    cmd: "{{ helm_binary_dest }} version --short"
+
+  register: helm_verify
+
+
+  changed_when: false
+
+
+
+- name: Assert Helm version
+
+  ansible.builtin.assert:
+
+    that:
+
+      - helm_version in helm_verify.stdout
+
+
+    fail_msg:
+
+      >
+      Helm installation failed.
+      Expected {{ helm_version }},
+      found {{ helm_verify.stdout }}
+
+
+    success_msg:
+
+      >
+      Helm successfully installed:
+      {{ helm_verify.stdout }}

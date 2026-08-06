@@ -1,0 +1,68 @@
+---
+
+###############################################################################
+# Final Cluster Validation
+###############################################################################
+
+
+- name: Validate Kubernetes nodes
+
+  ansible.builtin.include_tasks:
+
+    file: validate_nodes.yml
+
+
+
+- name: Validate control plane static pods
+
+  ansible.builtin.include_tasks:
+
+    file: validate_control_plane.yml
+
+
+
+- name: Validate API Server
+
+  ansible.builtin.include_tasks:
+
+    file: validate_api_server.yml
+
+
+
+- name: Validate etcd health
+
+  ansible.builtin.include_tasks:
+
+    file: validate_etcd_health.yml
+
+
+
+- name: Validate CoreDNS
+
+  ansible.builtin.include_tasks:
+
+    file: validate_coredns.yml
+
+
+
+- name: Validate Kubernetes pods
+
+  ansible.builtin.include_tasks:
+
+    file: validate_pods.yml
+
+
+
+- name: Validate Monitoring Stack
+
+  ansible.builtin.include_tasks:
+
+    file: validate_monitoring.yml
+
+
+
+- name: Print validation summary
+
+  ansible.builtin.include_tasks:
+
+    file: summary.yml

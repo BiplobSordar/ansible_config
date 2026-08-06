@@ -1,0 +1,32 @@
+---
+# roles/common/defaults/main.yml
+#
+# The `common` role is VERIFY-ONLY. It never installs software - everything
+# listed here is expected to already exist on the Golden AMI.
+
+common_fail_on_violation: true
+
+common_expected_swap_kb: 0
+
+common_expected_kernel_modules:
+  - overlay
+  - br_netfilter
+
+common_expected_sysctl:
+  net.ipv4.ip_forward: "1"
+  net.bridge.bridge-nf-call-iptables: "1"
+  net.bridge.bridge-nf-call-ip6tables: "1"
+
+common_expected_packages:
+  - chrony
+  - python3
+  - python3-pip
+  - curl
+  - jq
+  - socat
+  - conntrack
+  - ethtool
+  - ebtables
+  - unzip
+
+common_chrony_service_name: chrony

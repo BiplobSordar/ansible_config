@@ -1,0 +1,55 @@
+---
+###############################################################################
+# Helm Platform Validation
+###############################################################################
+
+
+- name: Validate namespaces
+
+  command: >
+
+    kubectl
+    --kubeconfig={{ validation_admin_conf_path }}
+    get namespace {{ item }}
+
+
+  loop: "{{ validation_required_namespaces }}"
+
+
+  changed_when: false
+
+
+
+
+- name: Validate deployments
+
+  command: >
+
+    kubectl
+    --kubeconfig={{ validation_admin_conf_path }}
+    -n {{ item.split('/')[0] }}
+    get deployment {{ item.split('/')[1] }}
+
+
+  loop: "{{ validation_required_deployments }}"
+
+
+  changed_when: false
+
+
+
+
+- name: Validate daemonsets
+
+  command: >
+
+    kubectl
+    --kubeconfig={{ validation_admin_conf_path }}
+    -n {{ item.split('/')[0] }}
+    get daemonset {{ item.split('/')[1] }}
+
+
+  loop: "{{ validation_required_daemonsets }}"
+
+
+  changed_when: false

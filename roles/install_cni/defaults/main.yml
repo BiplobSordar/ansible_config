@@ -1,0 +1,5 @@
+---
+# roles/install_cni/defaults/main.yml
+cni_manifest_dest: /etc/kubernetes/calico.yaml
+cni_node_ready_wait_retries: 30
+cni_node_ready_wait_delay: 10

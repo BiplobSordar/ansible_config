@@ -1,0 +1,19 @@
+---
+
+- name: Add Prometheus Helm repository
+
+  kubernetes.core.helm_repository:
+
+    name: "{{ monitoring_helm_repositories.prometheus.name }}"
+
+    repo_url: "{{ monitoring_helm_repositories.prometheus.url }}"
+
+
+
+- name: Add Grafana Helm repository
+
+  kubernetes.core.helm_repository:
+
+    name: "{{ monitoring_helm_repositories.grafana.name }}"
+
+    repo_url: "{{ monitoring_helm_repositories.grafana.url }}"

@@ -1,0 +1,216 @@
+###############################################################################
+# Join Additional Control Plane Node
+###############################################################################
+
+- name: Check join marker
+  stat:
+    path: "{{ join_marker_path }}"
+  register: join_marker
+
+
+- name: Check admin.conf
+  stat:
+    path: "{{ join_admin_conf_path }}"
+  register: admin_conf
+
+
+- name: Determine joined state
+  set_fact:
+    node_already_joined: >-
+      {{
+        join_marker.stat.exists
+        and
+        admin_conf.stat.exists
+      }}
+
+
+###############################################################################
+# Validate kubeadm
+###############################################################################
+
+- name: Check kubeadm installation
+  command:
+    cmd: kubeadm version
+  changed_when: false
+
+
+###############################################################################
+# Get join command locally
+###############################################################################
+
+- name: Check local join artifact
+  stat:
+    path: "{{ control_plane_join_command_path }}"
+  delegate_to: localhost
+  become: false
+  register: local_join_command
+  when: not node_already_joined
+
+
+
+- name: Load local join command
+  set_fact:
+
+    control_plane_join_cmd: "{{ lookup('file', control_plane_join_command_path) | trim }}"
+
+  when:
+
+    - not node_already_joined
+    - local_join_command.stat.exists | default(false)
+
+
+
+###############################################################################
+# SSM fallback
+###############################################################################
+
+- name: Get join command from SSM
+  amazon.aws.aws_ssm_parameter_store:
+
+    name: "{{ kubeadm_control_plane_join_parameter }}"
+
+    region: "{{ aws_region }}"
+
+  delegate_to: localhost
+
+  become: false
+
+  register: ssm_join_command
+
+
+  when:
+
+    - not node_already_joined
+    - join_use_ssm_fallback
+    - not (local_join_command.stat.exists | default(false))
+
+
+
+- name: Set SSM join command
+  set_fact:
+
+    control_plane_join_cmd: "{{ ssm_join_command.parameter.value | trim }}"
+
+  when:
+
+    - not node_already_joined
+    - join_use_ssm_fallback
+    - not (local_join_command.stat.exists | default(false))
+
+
+
+###############################################################################
+# Validate command
+###############################################################################
+
+- name: Validate join command exists
+  assert:
+
+    that:
+
+      - control_plane_join_cmd is defined
+      - control_plane_join_cmd | length > 0
+
+
+    fail_msg:
+
+      Unable to find kubeadm control plane join command.
+
+
+
+###############################################################################
+# Join Kubernetes
+###############################################################################
+
+- name: Join Kubernetes control plane
+  shell:
+
+    cmd: "{{ control_plane_join_cmd }}"
+
+    executable: /bin/bash
+
+
+  register: kubeadm_join
+
+
+  when:
+
+    - not node_already_joined
+
+
+
+###############################################################################
+# Marker
+###############################################################################
+
+- name: Create join marker
+
+  copy:
+
+    dest: "{{ join_marker_path }}"
+
+    content: |
+      joined_at={{ ansible_date_time.iso8601 }}
+
+    owner: root
+
+    group: root
+
+    mode: "0600"
+
+
+  when:
+
+    - not node_already_joined
+    - kubeadm_join.rc == 0
+
+
+
+###############################################################################
+# Configure kubectl
+###############################################################################
+
+- name: Configure kubectl
+
+  include_tasks:
+
+    configure_kubectl.yml
+
+
+
+###############################################################################
+# Wait Ready
+###############################################################################
+
+- name: Wait for Kubernetes readiness
+
+  include_tasks:
+
+    wait_for_ready.yml
+
+
+
+###############################################################################
+# Validate etcd
+###############################################################################
+
+- name: Validate etcd membership
+
+  include_tasks:
+
+    validate_etcd.yml
+
+
+
+###############################################################################
+# Report
+###############################################################################
+
+- name: Join complete
+
+  debug:
+
+    msg:
+
+      - "Control plane joined"
+      - "Node: {{ ansible_hostname }}"

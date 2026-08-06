@@ -1,0 +1,30 @@
+---
+
+###############################################################################
+# Monitoring Installation
+###############################################################################
+
+
+- name: Install Kubernetes Monitoring Stack
+
+
+  hosts: bootstrap
+
+
+  become: true
+
+
+  gather_facts: true
+
+
+
+  roles:
+
+
+    - role: install_monitoring
+
+
+  tags:
+
+
+    - monitoring

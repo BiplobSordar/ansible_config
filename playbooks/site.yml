@@ -1,0 +1,79 @@
+---
+###############################################################################
+# Production Kubernetes Provisioning Pipeline
+###############################################################################
+- name: Load Terraform Outputs
+
+  hosts: localhost
+
+  gather_facts: false
+
+  tasks:
+
+    - name: Read Terraform outputs
+
+      ansible.builtin.include_vars:
+
+        file: "{{ playbook_dir }}/terraform/outputs.json"
+
+        name: terraform_outputs
+
+- name: Stage 1 - Common OS Setup
+
+  import_playbook: 01-common.yml
+
+
+
+- name: Stage 2 - Container Runtime
+
+  import_playbook: 02-containerd.yml
+
+
+
+- name: Stage 3 - Kubernetes Packages
+
+  import_playbook: 03-kubernetes.yml
+
+
+
+- name: Stage 4 - Bootstrap Control Plane
+
+  import_playbook: 04-bootstrap-control-plane.yml
+
+
+
+- name: Stage 5 - Join Control Plane Nodes
+
+  import_playbook: 05-join-control-plane.yml
+
+
+
+- name: Stage 6 - Install Calico CNI
+
+  import_playbook: 06-install-cni.yml
+
+
+
+- name: Stage 7 - Join Worker Nodes
+
+  import_playbook: 07-join-workers.yml
+
+
+
+- name: Stage 8 - Install Helm CLI
+
+  import_playbook: 08-install-helm.yml
+
+
+
+- name: Stage 9 - Install Platform Components
+
+  import_playbook: 09-install-platform.yml
+
+- import_playbook: 11-install-monitoring.yml
+
+
+
+- name: Stage 10 - Validate Cluster
+
+  import_playbook: 10-validation.yml

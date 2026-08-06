@@ -1,0 +1,3 @@
+---
+# roles/bootstrap_control_plane/vars/main.yml
+bootstrap_role_name: bootstrap_control_plane

@@ -1,0 +1,93 @@
+# {{ ansible_managed }}
+
+###############################################################################
+# AWS EBS CSI Driver
+#
+# Provides Kubernetes persistent storage using AWS EBS volumes
+#
+###############################################################################
+
+
+###############################################################################
+# Controller
+###############################################################################
+
+controller:
+
+  replicaCount: 2
+
+
+  serviceAccount:
+
+    create: true
+
+    name: ebs-csi-controller-sa
+
+
+  resources:
+
+    requests:
+
+      cpu: 50m
+
+      memory: 128Mi
+
+
+    limits:
+
+      cpu: 500m
+
+      memory: 512Mi
+
+
+
+###############################################################################
+# Node Plugin
+#
+# Runs on every worker node
+###############################################################################
+
+node:
+
+  resources:
+
+    requests:
+
+      cpu: 20m
+
+      memory: 60Mi
+
+
+    limits:
+
+      cpu: 200m
+
+      memory: 200Mi
+
+
+
+###############################################################################
+# Storage Class
+###############################################################################
+
+storageClasses:
+
+  - name: gp3
+
+
+    annotations:
+
+      storageclass.kubernetes.io/is-default-class: "true"
+
+
+    volumeBindingMode: WaitForFirstConsumer
+
+
+    reclaimPolicy: Delete
+
+
+    parameters:
+
+      type: gp3
+
+      encrypted: "true"

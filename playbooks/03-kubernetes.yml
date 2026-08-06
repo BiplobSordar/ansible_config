@@ -1,0 +1,11 @@
+---
+- name: Verify Kubernetes Components
+  hosts: control_plane:workers
+
+  gather_facts: true
+  any_errors_fatal: true
+
+  roles:
+    - role: kubernetes
+      tags:
+        - kubernetes

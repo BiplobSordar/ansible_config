@@ -1,0 +1,16 @@
+---
+# ==============================================================================
+# Verify Container Runtime
+# ==============================================================================
+
+- name: Verify containerd version
+  ansible.builtin.include_tasks: verify_version.yml
+
+- name: Verify containerd service
+  ansible.builtin.include_tasks: verify_service.yml
+
+- name: Verify containerd configuration
+  ansible.builtin.include_tasks: verify_config.yml
+
+- name: Ensure crictl configuration exists
+  ansible.builtin.include_tasks: ensure_crictl_config.yml

@@ -1,0 +1,29 @@
+---
+# roles/common/tasks/verify_os.yml
+
+- name: Assert operating system distribution matches Golden AMI
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.distribution == expected_os_family
+    fail_msg: >
+      Expected {{ expected_os_family }} but found
+      {{ ansible_facts.distribution }}.
+    success_msg: "Operating System verified."
+
+- name: Assert operating system version matches Golden AMI
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.distribution_version is version(expected_os_version, "==")
+    fail_msg: >
+      Expected Ubuntu {{ expected_os_version }}
+      but found {{ ansible_facts.distribution_version }}.
+    success_msg: "OS version verified."
+
+- name: Assert kernel major version
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.kernel is version(expected_kernel_version, ">=")
+    fail_msg: >
+      Kernel version {{ ansible_facts.kernel }}
+      is lower than expected {{ expected_kernel_version }}.
+    success_msg: "Kernel version verified."

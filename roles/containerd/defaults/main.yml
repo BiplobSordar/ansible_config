@@ -1,0 +1,23 @@
+---
+---
+# ==============================================================================
+# Containerd Role Defaults
+# ==============================================================================
+
+containerd_expected_min_version: "2.2.0"
+
+containerd_binary_path: /usr/bin/containerd
+
+containerd_service_name: containerd
+
+containerd_config_path: /etc/containerd/config.toml
+
+containerd_expected_systemd_cgroup: true
+
+crictl_config_path: /etc/crictl.yaml
+
+crictl_runtime_endpoint: "unix:///run/containerd/containerd.sock"
+
+crictl_image_endpoint: "unix:///run/containerd/containerd.sock"
+
+crictl_timeout_seconds: 10

@@ -1,0 +1,224 @@
+###############################################################################
+# Join Kubernetes Workers
+###############################################################################
+
+
+- name: Check worker join marker
+
+  stat:
+
+    path: "{{ worker_join_marker_path }}"
+
+  register: worker_join_marker
+
+
+
+###############################################################################
+# Validate kubeadm
+###############################################################################
+
+
+- name: Check kubeadm
+
+  command:
+
+    cmd: kubeadm version
+
+  changed_when: false
+
+
+
+###############################################################################
+# Check local artifact
+###############################################################################
+
+
+- name: Check worker join command file
+
+  stat:
+
+    path: "{{ worker_join_command_path }}"
+
+  delegate_to: localhost
+
+  become: false
+
+  register: worker_join_file
+
+  when: not worker_join_marker.stat.exists
+
+
+
+###############################################################################
+# Load local command
+###############################################################################
+
+
+- name: Load worker join command
+
+  set_fact:
+
+
+    worker_join_cmd: "{{ lookup('file', worker_join_command_path) | trim }}"
+
+
+  when:
+
+    - not worker_join_marker.stat.exists
+
+    - worker_join_file.stat.exists | default(false)
+
+
+
+###############################################################################
+# SSM fallback
+###############################################################################
+
+
+- name: Get worker join command from SSM
+
+
+  amazon.aws.aws_ssm_parameter_store:
+
+
+    name: "{{ worker_join_ssm_parameter }}"
+
+
+    region: "{{ aws_region }}"
+
+
+  register: worker_ssm_join
+
+
+  delegate_to: localhost
+
+
+  become: false
+
+
+  when:
+
+    - not worker_join_marker.stat.exists
+
+    - worker_join_use_ssm_fallback
+
+    - not (worker_join_file.stat.exists | default(false))
+
+
+
+- name: Set SSM worker join command
+
+
+  set_fact:
+
+
+    worker_join_cmd: "{{ worker_ssm_join.parameter.value | trim }}"
+
+
+  when:
+
+    - not worker_join_marker.stat.exists
+
+    - worker_join_use_ssm_fallback
+
+    - not (worker_join_file.stat.exists | default(false))
+
+
+
+###############################################################################
+# Validate
+###############################################################################
+
+
+- name: Verify worker join command exists
+
+
+  assert:
+
+
+    that:
+
+      - worker_join_cmd is defined
+
+      - worker_join_cmd | length > 0
+
+
+    fail_msg:
+
+      Worker kubeadm join command not found.
+
+
+
+###############################################################################
+# Join worker
+###############################################################################
+
+
+- name: Join Kubernetes worker
+
+
+  shell:
+
+
+    cmd: "{{ worker_join_cmd }}"
+
+
+    executable: /bin/bash
+
+
+  register: kubeadm_worker_join_result
+
+
+  when:
+
+
+    - not worker_join_marker.stat.exists
+
+
+
+###############################################################################
+# Marker
+###############################################################################
+
+
+- name: Create worker join marker
+
+
+  copy:
+
+
+    dest: "{{ worker_join_marker_path }}"
+
+
+    content: |
+
+      joined_at={{ ansible_date_time.iso8601 }}
+
+
+    owner: root
+
+    group: root
+
+    mode: "0600"
+
+
+  when:
+
+
+    - not worker_join_marker.stat.exists
+
+    - kubeadm_worker_join_result.rc == 0
+
+
+
+###############################################################################
+# Validate Ready
+###############################################################################
+
+
+- name: Wait worker Ready
+
+
+  include_tasks:
+
+    wait_for_ready.yml

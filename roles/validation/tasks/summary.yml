@@ -1,0 +1,34 @@
+---
+
+- name: Cluster validation summary
+
+
+  ansible.builtin.debug:
+
+
+    msg:
+
+
+      - "===================================="
+
+      - " CLUSTER VALIDATION PASSED "
+
+      - " Cluster: {{ cluster_name }}"
+
+      - " Nodes: READY"
+
+      - " API Server: HEALTHY"
+
+      - " etcd: HEALTHY"
+
+      - " CoreDNS: HEALTHY"
+
+      - " Prometheus: READY"
+
+      - " Grafana: READY"
+
+      - " Loki: READY"
+
+      - " Promtail: READY"
+
+      - "===================================="

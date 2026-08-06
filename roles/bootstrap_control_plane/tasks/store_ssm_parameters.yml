@@ -1,81 +1,72 @@
 ---
 ###############################################################################
-# Store Join Credentials in AWS SSM Parameter Store
+# Store Kubernetes Join Credentials in AWS SSM Parameter Store
 #
-# Terraform creates the SSM parameters.
+# Terraform creates these parameters.
 # Bootstrap updates their values after kubeadm init.
 #
-# This allows:
+# Parameters
 #
-# • Worker nodes
-# • Future control-plane nodes
-# • Jenkins
-# • Auto Scaling Groups
+#   Worker Join Command
+#   Control Plane Join Command
 #
-# to retrieve the latest join credentials.
+# These values are later consumed by:
+#
+#   • join_workers role
+#   • join_control_plane role
+#   • Jenkins
+#   • Auto Scaling Groups
+#
 ###############################################################################
 
 ################################################################################
-# Verify required variables exist
+# Validate Required Variables
 ################################################################################
 
-- name: Assert SSM parameter names are provided
+- name: Verify required SSM parameter names exist
   ansible.builtin.assert:
     that:
       - kubeadm_worker_join_parameter is defined
-      - kubeadm_certificate_key_parameter is defined
+      - kubeadm_control_plane_join_parameter is defined
+      - aws_region is defined
     fail_msg: >
-      Missing SSM parameter names.
-      Ensure Terraform outputs are passed into Ansible.
+      Required SSM parameter names are missing.
+      Ensure Terraform outputs are loaded into Ansible.
 
 ################################################################################
 # Store Worker Join Command
 ################################################################################
 
-- name: Store worker join command in AWS SSM
-  amazon.aws.ssm_parameter:
-
+- name: Store worker join command
+  community.aws.ssm_parameter:
     name: "{{ kubeadm_worker_join_parameter }}"
-
-    description: "Kubernetes Worker Join Command"
-
+    description: Kubernetes Worker Join Command
     string_type: SecureString
-
     value: "{{ fact_worker_join_command }}"
-
     overwrite_value: always
-
     region: "{{ aws_region }}"
-
     state: present
 
 ################################################################################
-# Store Certificate Key
+# Store Control Plane Join Command
 ################################################################################
 
-- name: Store control-plane certificate key in AWS SSM
-  amazon.aws.ssm_parameter:
-
-    name: "{{ kubeadm_certificate_key_parameter }}"
-
-    description: "Kubernetes Control Plane Certificate Key"
-
+- name: Store control-plane join command
+  community.aws.ssm_parameter:
+    name: "{{ kubeadm_control_plane_join_parameter }}"
+    description: Kubernetes Control Plane Join Command
     string_type: SecureString
-
-    value: "{{ fact_certificate_key }}"
-
+    value: "{{ fact_control_plane_join_command }}"
     overwrite_value: always
-
     region: "{{ aws_region }}"
-
     state: present
 
 ################################################################################
 # Report
 ################################################################################
 
-- name: Report successful SSM update
+- name: Report SSM update
   ansible.builtin.debug:
     msg:
       - "Worker join command stored in AWS SSM."
-      - "Certificate key stored in AWS SSM."
+      - "Control-plane join command stored in AWS SSM."

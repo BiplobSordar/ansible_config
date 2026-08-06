@@ -1,20 +1,53 @@
 ###############################################################################
-# Validate stacked etcd
+# Validate Stacked etcd Membership
+#
+# kubeadm HA cluster uses stacked etcd:
+#
+# Control Plane 1
+#        |
+#        |
+#        +---- etcd member
+#
+# Control Plane 2
+#        |
+#        |
+#        +---- etcd member
+#
+# Control Plane 3
+#        |
+#        |
+#        +---- etcd member
+#
+#
+# This task verifies:
+#
+# 1. etcd pod is running
+# 2. Current node exists in etcd membership
+#
 ###############################################################################
 
 
-- name: Wait etcd pod
+###############################################################################
+# Wait for local etcd pod
+###############################################################################
 
-  command:
+- name: Wait for local etcd pod running
 
-    cmd:
+  ansible.builtin.command:
+
+    cmd: >
 
       kubectl
+
       --kubeconfig={{ join_admin_conf_path }}
+
       -n kube-system
+
       get pod
+
       etcd-{{ ansible_hostname }}
-      -o jsonpath={.status.phase}
+
+      -o jsonpath='{.status.phase}'
 
 
   register: etcd_phase
@@ -30,31 +63,47 @@
 
   until:
 
+    - etcd_phase.rc == 0
+
     - etcd_phase.stdout == "Running"
 
 
 
-- name: Get etcd members
+###############################################################################
+# Get etcd members
+###############################################################################
 
+- name: Get etcd cluster members
 
-  command:
+  ansible.builtin.command:
 
     cmd: >
 
       kubectl
-      --kubeconfig={{ join_admin_conf_path }}
-      -n kube-system
-      exec
-      etcd-{{ ansible_hostname }}
-      -c etcd
-      --
-      etcdctl
-      --endpoints=https://127.0.0.1:2379
-      --cacert=/etc/kubernetes/pki/etcd/ca.crt
-      --cert=/etc/kubernetes/pki/etcd/server.crt
-      --key=/etc/kubernetes/pki/etcd/server.key
-      member list
 
+      --kubeconfig={{ join_admin_conf_path }}
+
+      -n kube-system
+
+      exec
+
+      etcd-{{ ansible_hostname }}
+
+      -c etcd
+
+      --
+
+      etcdctl
+
+      --endpoints=https://127.0.0.1:2379
+
+      --cacert=/etc/kubernetes/pki/etcd/ca.crt
+
+      --cert=/etc/kubernetes/pki/etcd/server.crt
+
+      --key=/etc/kubernetes/pki/etcd/server.key
+
+      member list
 
 
   register: etcd_members
@@ -64,22 +113,24 @@
 
 
 
-- name: Verify etcd member
+###############################################################################
+# Validate current member
+###############################################################################
 
-  assert:
+- name: Verify current control-plane exists in etcd
 
+  ansible.builtin.assert:
 
     that:
 
       - ansible_hostname in etcd_members.stdout
 
 
-    fail_msg:
+    fail_msg: >
 
-      "This control plane node is not registered in etcd"
+      {{ ansible_hostname }} was not found in etcd membership.
 
 
+    success_msg: >
 
-    success_msg:
-
-      "etcd membership verified for {{ ansible_hostname }}"
+      etcd membership verified for {{ ansible_hostname }}.

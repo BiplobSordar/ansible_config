@@ -1,11 +1,27 @@
 ###############################################################################
-# Join Kubernetes Workers
+# Join Kubernetes Worker Node
+#
+# Responsibilities:
+#
+# 1. Check if worker already joined
+# 2. Validate kubeadm installation
+# 3. Load worker join command
+#      - Local artifact first
+#      - AWS SSM fallback
+# 4. Execute kubeadm join
+# 5. Create worker join marker
+# 6. Wait until worker becomes Ready
+#
 ###############################################################################
 
 
+###############################################################################
+# Check Existing State
+###############################################################################
+
 - name: Check worker join marker
 
-  stat:
+  ansible.builtin.stat:
 
     path: "{{ worker_join_marker_path }}"
 
@@ -13,14 +29,21 @@
 
 
 
+- name: Determine worker joined state
+
+  ansible.builtin.set_fact:
+
+    worker_already_joined: "{{ worker_join_marker.stat.exists }}"
+
+
+
 ###############################################################################
 # Validate kubeadm
 ###############################################################################
 
+- name: Check kubeadm installation
 
-- name: Check kubeadm
-
-  command:
+  ansible.builtin.command:
 
     cmd: kubeadm version
 
@@ -29,13 +52,12 @@
 
 
 ###############################################################################
-# Check local artifact
+# Get Local Worker Join Artifact
 ###############################################################################
 
+- name: Check local worker join command artifact
 
-- name: Check worker join command file
-
-  stat:
+  ansible.builtin.stat:
 
     path: "{{ worker_join_command_path }}"
 
@@ -45,79 +67,50 @@
 
   register: worker_join_file
 
-  when: not worker_join_marker.stat.exists
+  when: not worker_already_joined
 
 
 
-###############################################################################
-# Load local command
-###############################################################################
+- name: Load worker join command from local artifact
 
+  ansible.builtin.set_fact:
 
-- name: Load worker join command
-
-  set_fact:
-
-
-    worker_join_cmd: "{{ lookup('file', worker_join_command_path) | trim }}"
-
+    worker_join_cmd: >-
+      {{
+        lookup(
+          'file',
+          worker_join_command_path
+        ) | trim
+      }}
 
   when:
 
-    - not worker_join_marker.stat.exists
+    - not worker_already_joined
 
     - worker_join_file.stat.exists | default(false)
 
 
 
 ###############################################################################
-# SSM fallback
+# AWS SSM FALLBACK
 ###############################################################################
 
+- name: Load worker join command from AWS SSM
 
-- name: Get worker join command from SSM
+  ansible.builtin.set_fact:
 
-
-  amazon.aws.aws_ssm_parameter_store:
-
-
-    name: "{{ worker_join_ssm_parameter }}"
-
-
-    region: "{{ aws_region }}"
-
-
-  register: worker_ssm_join
-
-
-  delegate_to: localhost
-
-
-  become: false
-
+    worker_join_cmd: >-
+      {{
+        lookup(
+          'amazon.aws.ssm_parameter',
+          worker_join_ssm_parameter,
+          region=aws_region
+        ) | trim
+      }}
 
   when:
 
-    - not worker_join_marker.stat.exists
-
-    - worker_join_use_ssm_fallback
-
-    - not (worker_join_file.stat.exists | default(false))
-
-
-
-- name: Set SSM worker join command
-
-
-  set_fact:
-
-
-    worker_join_cmd: "{{ worker_ssm_join.parameter.value | trim }}"
-
-
-  when:
-
-    - not worker_join_marker.stat.exists
+    - not worker_already_joined
 
     - worker_join_use_ssm_fallback
 
@@ -126,15 +119,12 @@
 
 
 ###############################################################################
-# Validate
+# Validate Join Command
 ###############################################################################
-
 
 - name: Verify worker join command exists
 
-
-  assert:
-
+  ansible.builtin.assert:
 
     that:
 
@@ -145,23 +135,19 @@
 
     fail_msg:
 
-      Worker kubeadm join command not found.
+      Worker kubeadm join command was not found.
 
 
 
 ###############################################################################
-# Join worker
+# Join Worker Node
 ###############################################################################
 
+- name: Join Kubernetes worker node
 
-- name: Join Kubernetes worker
-
-
-  shell:
-
+  ansible.builtin.shell:
 
     cmd: "{{ worker_join_cmd }}"
-
 
     executable: /bin/bash
 
@@ -171,29 +157,23 @@
 
   when:
 
-
-    - not worker_join_marker.stat.exists
+    - not worker_already_joined
 
 
 
 ###############################################################################
-# Marker
+# Create Worker Marker
 ###############################################################################
-
 
 - name: Create worker join marker
 
-
-  copy:
-
+  ansible.builtin.copy:
 
     dest: "{{ worker_join_marker_path }}"
 
-
     content: |
-
       joined_at={{ ansible_date_time.iso8601 }}
-
+      node={{ inventory_hostname }}
 
     owner: root
 
@@ -204,21 +184,34 @@
 
   when:
 
-
-    - not worker_join_marker.stat.exists
+    - not worker_already_joined
 
     - kubeadm_worker_join_result.rc == 0
 
 
 
 ###############################################################################
-# Validate Ready
+# Wait Worker Ready
 ###############################################################################
 
+- name: Wait worker node readiness
 
-- name: Wait worker Ready
+  ansible.builtin.include_tasks:
+
+    file: wait_for_ready.yml
 
 
-  include_tasks:
 
-    wait_for_ready.yml
+###############################################################################
+# Report
+###############################################################################
+
+- name: Worker join complete
+
+  ansible.builtin.debug:
+
+    msg:
+
+      - "Worker node joined successfully"
+
+      - "Node: {{ inventory_hostname }}"

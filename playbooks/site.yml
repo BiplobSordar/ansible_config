@@ -2,21 +2,6 @@
 ###############################################################################
 # Production Kubernetes Provisioning Pipeline
 ###############################################################################
-- name: Load Terraform Outputs
-
-  hosts: localhost
-
-  gather_facts: false
-
-  tasks:
-
-    - name: Read Terraform outputs
-
-      ansible.builtin.include_vars:
-
-        file: "{{ playbook_dir }}/terraform/outputs.json"
-
-        name: terraform_outputs
 
 - name: Stage 1 - Common OS Setup
 

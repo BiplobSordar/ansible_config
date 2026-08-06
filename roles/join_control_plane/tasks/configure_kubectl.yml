@@ -1,82 +1,129 @@
----
 ###############################################################################
-# Configure kubectl
+# Configure kubectl on Joined Control Plane Node
 #
-# After kubeadm join, Kubernetes creates:
+# After kubeadm join --control-plane:
+#
+# Kubernetes creates:
 #
 #   /etc/kubernetes/admin.conf
 #
 # This task:
 #
-#   • Verifies admin.conf exists
-#   • Creates /root/.kube
-#   • Installs kubeconfig
-#   • Verifies kubectl is functional
+# 1. Verifies admin.conf exists
+# 2. Creates root kubeconfig directory
+# 3. Copies admin.conf to kubectl default location
+# 4. Tests kubectl communication
 #
-# Safe to execute multiple times.
 ###############################################################################
 
-################################################################################
-# Verify admin.conf exists
-################################################################################
+
+###############################################################################
+# Verify admin.conf
+###############################################################################
 
 - name: Check admin.conf exists
+
   ansible.builtin.stat:
+
     path: "{{ join_admin_conf_path }}"
+
   register: admin_conf
 
-- name: Assert admin.conf exists
+
+
+- name: Verify admin.conf is available
+
   ansible.builtin.assert:
+
     that:
+
       - admin_conf.stat.exists
+
+
     fail_msg: >
+
       {{ join_admin_conf_path }} does not exist.
 
-      This control-plane node has not successfully joined the cluster.
-    success_msg: "admin.conf found."
+      kubeadm control-plane join was not completed successfully.
 
-################################################################################
+
+
+###############################################################################
 # Create kubeconfig directory
-################################################################################
+###############################################################################
 
-- name: Ensure root kubeconfig directory exists
+- name: Create root kubeconfig directory
+
   ansible.builtin.file:
+
     path: /root/.kube
+
     state: directory
+
     owner: root
+
     group: root
+
     mode: "0700"
 
-################################################################################
+
+
+###############################################################################
 # Install kubeconfig
-################################################################################
+###############################################################################
 
 - name: Install admin kubeconfig
+
   ansible.builtin.copy:
+
     src: "{{ join_admin_conf_path }}"
+
     dest: /root/.kube/config
+
     remote_src: true
+
     owner: root
+
     group: root
+
     mode: "0600"
 
-################################################################################
-# Verify kubectl
-################################################################################
 
-- name: Verify kubectl can access the cluster
+
+###############################################################################
+# Validate kubectl
+###############################################################################
+
+- name: Verify kubectl access
+
   ansible.builtin.command:
+
     cmd: >
+
       kubectl
+
       --kubeconfig={{ join_admin_conf_path }}
+
       get nodes
-  register: kubectl_verify
+
+
+  register: kubectl_check
+
+
   changed_when: false
 
-################################################################################
-# Report success
-################################################################################
+
+
+###############################################################################
+# Report
+###############################################################################
 
 - name: Report kubectl configuration
+
   ansible.builtin.debug:
-    msg: "kubectl configured successfully on {{ inventory_hostname }}."
+
+    msg:
+
+      - "kubectl configured successfully"
+
+      - "Node: {{ inventory_hostname }}"

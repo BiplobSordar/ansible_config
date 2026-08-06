@@ -1,21 +1,39 @@
 ###############################################################################
-# Worker Ready Validation
+# Worker Node Ready Validation
+#
+# Worker join flow:
+#
+# kubeadm join
+#       |
+#       v
+# kubelet starts
+#       |
+#       v
+# Node registers in Kubernetes
+#       |
+#       v
+# Wait until Ready=True
+#
 ###############################################################################
 
 
-- name: Wait until worker becomes Ready
+###############################################################################
+# Wait Worker Ready
+###############################################################################
 
+- name: Wait until worker node becomes Ready
 
-  command: >-
+  ansible.builtin.command:
 
-    kubectl
+    cmd: >
 
-    --kubeconfig={{ worker_admin_conf_path_on_control_plane }}
+      kubectl
 
-    get node {{ ansible_hostname }}
+      --kubeconfig={{ worker_admin_conf_path_on_control_plane }}
 
-    -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+      get node {{ ansible_hostname }}
 
+      -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
 
 
   register: worker_node_ready
@@ -29,28 +47,32 @@
 
   retries: "{{ worker_ready_wait_retries }}"
 
-
   delay: "{{ worker_ready_wait_delay }}"
 
 
   until:
 
+    - worker_node_ready.rc == 0
 
     - worker_node_ready.stdout == "True"
 
 
 
-- name: Display worker status
+###############################################################################
+# Display Cluster Nodes
+###############################################################################
 
+- name: Get Kubernetes cluster nodes
 
-  command: >-
+  ansible.builtin.command:
 
-    kubectl
+    cmd: >
 
-    --kubeconfig={{ worker_admin_conf_path_on_control_plane }}
+      kubectl
 
-    get nodes -o wide
+      --kubeconfig={{ worker_admin_conf_path_on_control_plane }}
 
+      get nodes -o wide
 
 
   register: worker_nodes
@@ -63,10 +85,12 @@
 
 
 
-- name: Show cluster nodes
+###############################################################################
+# Report
+###############################################################################
 
+- name: Show Kubernetes nodes
 
-  debug:
-
+  ansible.builtin.debug:
 
     var: worker_nodes.stdout_lines

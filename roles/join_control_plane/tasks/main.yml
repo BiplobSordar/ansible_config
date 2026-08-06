@@ -1,21 +1,42 @@
 ###############################################################################
-# Join Additional Control Plane Node
+# Join Additional Kubernetes Control Plane Node
+#
+# Responsibilities:
+#
+# 1. Check whether node already joined
+# 2. Validate kubeadm installation
+# 3. Load control-plane join command
+#      - Local artifact first
+#      - AWS SSM fallback
+# 4. Execute kubeadm join --control-plane
+# 5. Create join marker
+# 6. Configure kubectl
+# 7. Wait until node becomes Ready
+# 8. Validate etcd membership
+#
 ###############################################################################
 
-- name: Check join marker
-  stat:
+
+###############################################################################
+# Check Existing State
+###############################################################################
+
+- name: Check control-plane join marker
+  ansible.builtin.stat:
     path: "{{ join_marker_path }}"
   register: join_marker
 
 
 - name: Check admin.conf
-  stat:
+  ansible.builtin.stat:
     path: "{{ join_admin_conf_path }}"
   register: admin_conf
 
 
-- name: Determine joined state
-  set_fact:
+
+- name: Determine control-plane joined state
+  ansible.builtin.set_fact:
+
     node_already_joined: >-
       {{
         join_marker.stat.exists
@@ -24,34 +45,51 @@
       }}
 
 
+
 ###############################################################################
 # Validate kubeadm
 ###############################################################################
 
 - name: Check kubeadm installation
-  command:
+  ansible.builtin.command:
+
     cmd: kubeadm version
+
   changed_when: false
 
 
+
 ###############################################################################
-# Get join command locally
+# Get Local Join Artifact
 ###############################################################################
 
-- name: Check local join artifact
-  stat:
+- name: Check local control-plane join command artifact
+
+  ansible.builtin.stat:
+
     path: "{{ control_plane_join_command_path }}"
+
   delegate_to: localhost
+
   become: false
+
   register: local_join_command
+
   when: not node_already_joined
 
 
 
-- name: Load local join command
-  set_fact:
+- name: Load control-plane join command from local artifact
 
-    control_plane_join_cmd: "{{ lookup('file', control_plane_join_command_path) | trim }}"
+  ansible.builtin.set_fact:
+
+    control_plane_join_cmd: >-
+      {{
+        lookup(
+          'file',
+          control_plane_join_command_path
+        ) | trim
+      }}
 
   when:
 
@@ -61,35 +99,21 @@
 
 
 ###############################################################################
-# SSM fallback
+# AWS SSM FALLBACK
 ###############################################################################
 
-- name: Get join command from SSM
-  amazon.aws.aws_ssm_parameter_store:
+- name: Load control-plane join command from AWS SSM
 
-    name: "{{ kubeadm_control_plane_join_parameter }}"
+  ansible.builtin.set_fact:
 
-    region: "{{ aws_region }}"
-
-  delegate_to: localhost
-
-  become: false
-
-  register: ssm_join_command
-
-
-  when:
-
-    - not node_already_joined
-    - join_use_ssm_fallback
-    - not (local_join_command.stat.exists | default(false))
-
-
-
-- name: Set SSM join command
-  set_fact:
-
-    control_plane_join_cmd: "{{ ssm_join_command.parameter.value | trim }}"
+    control_plane_join_cmd: >-
+      {{
+        lookup(
+          'amazon.aws.ssm_parameter',
+          kubeadm_control_plane_join_parameter,
+          region=aws_region
+        ) | trim
+      }}
 
   when:
 
@@ -100,37 +124,40 @@
 
 
 ###############################################################################
-# Validate command
+# Validate Join Command
 ###############################################################################
 
-- name: Validate join command exists
-  assert:
+- name: Validate control-plane join command
+
+  ansible.builtin.assert:
 
     that:
 
       - control_plane_join_cmd is defined
+
       - control_plane_join_cmd | length > 0
 
 
     fail_msg:
 
-      Unable to find kubeadm control plane join command.
+      Control-plane join command was not found.
 
 
 
 ###############################################################################
-# Join Kubernetes
+# Join Kubernetes Control Plane
 ###############################################################################
 
-- name: Join Kubernetes control plane
-  shell:
+- name: Join Kubernetes control-plane node
+
+  ansible.builtin.shell:
 
     cmd: "{{ control_plane_join_cmd }}"
 
     executable: /bin/bash
 
 
-  register: kubeadm_join
+  register: kubeadm_control_plane_join
 
 
   when:
@@ -140,17 +167,18 @@
 
 
 ###############################################################################
-# Marker
+# Create Join Marker
 ###############################################################################
 
-- name: Create join marker
+- name: Create control-plane join marker
 
-  copy:
+  ansible.builtin.copy:
 
     dest: "{{ join_marker_path }}"
 
     content: |
       joined_at={{ ansible_date_time.iso8601 }}
+      node={{ inventory_hostname }}
 
     owner: root
 
@@ -162,7 +190,7 @@
   when:
 
     - not node_already_joined
-    - kubeadm_join.rc == 0
+    - kubeadm_control_plane_join.rc == 0
 
 
 
@@ -172,21 +200,21 @@
 
 - name: Configure kubectl
 
-  include_tasks:
+  ansible.builtin.include_tasks:
 
-    configure_kubectl.yml
+    file: configure_kubectl.yml
 
 
 
 ###############################################################################
-# Wait Ready
+# Wait Node Ready
 ###############################################################################
 
 - name: Wait for Kubernetes readiness
 
-  include_tasks:
+  ansible.builtin.include_tasks:
 
-    wait_for_ready.yml
+    file: wait_for_ready.yml
 
 
 
@@ -196,9 +224,9 @@
 
 - name: Validate etcd membership
 
-  include_tasks:
+  ansible.builtin.include_tasks:
 
-    validate_etcd.yml
+    file: validate_etcd.yml
 
 
 
@@ -206,11 +234,12 @@
 # Report
 ###############################################################################
 
-- name: Join complete
+- name: Control-plane join complete
 
-  debug:
+  ansible.builtin.debug:
 
     msg:
 
-      - "Control plane joined"
-      - "Node: {{ ansible_hostname }}"
+      - "Control-plane node joined successfully"
+
+      - "Node: {{ inventory_hostname }}"

@@ -2,99 +2,107 @@
 ###############################################################################
 # Wait for Kubernetes API Server
 #
-# This task waits until the bootstrap control-plane node has completely
-# started the Kubernetes API Server and registered itself with the cluster.
+# This task waits until the bootstrap control-plane is fully operational.
 #
-# Safe to execute multiple times.
+# Responsibilities
+#
+# 1. Wait for API Server health endpoint.
+# 2. Wait for bootstrap node registration.
+# 3. Wait until bootstrap node becomes Ready.
+# 4. Display cluster status.
+#
 ###############################################################################
 
 ################################################################################
-# Wait for kube-apiserver health endpoint
+# Wait for API Server Health
 ################################################################################
 
-- name: Wait for Kubernetes API server to become healthy
+- name: Wait for Kubernetes API server
   ansible.builtin.command:
     cmd: >
       kubectl
       --kubeconfig={{ bootstrap_admin_conf_path }}
       get --raw=/healthz
-
   register: api_health
-
   changed_when: false
-
   retries: "{{ bootstrap_api_wait_retries }}"
-
   delay: "{{ bootstrap_api_wait_delay }}"
-
   until:
     - api_health.rc == 0
     - api_health.stdout | trim == "ok"
 
 ################################################################################
-# Wait until bootstrap node appears in the cluster
+# Wait for Bootstrap Node Registration
 ################################################################################
 
-- name: Wait for bootstrap node registration
+- name: Wait until bootstrap node is registered
   ansible.builtin.command:
     cmd: >
       kubectl
       --kubeconfig={{ bootstrap_admin_conf_path }}
-      get node {{ inventory_hostname }}
-
+      get node {{ ansible_hostname }}
   register: bootstrap_node
-
   changed_when: false
-
   retries: "{{ bootstrap_api_wait_retries }}"
-
   delay: "{{ bootstrap_api_wait_delay }}"
-
   until: bootstrap_node.rc == 0
 
 ################################################################################
-# Wait until bootstrap node becomes Ready
+# Wait for Bootstrap Node Ready
 ################################################################################
 
-- name: Wait until bootstrap node is Ready
+- name: Wait until bootstrap node becomes Ready
   ansible.builtin.command:
     cmd: >
       kubectl
       --kubeconfig={{ bootstrap_admin_conf_path }}
-      get node {{ inventory_hostname }}
+      get node {{ ansible_hostname }}
       -o jsonpath={.status.conditions[?(@.type=="Ready")].status}
-
   register: bootstrap_ready
-
   changed_when: false
-
   retries: "{{ bootstrap_api_wait_retries }}"
-
   delay: "{{ bootstrap_api_wait_delay }}"
-
   until:
     - bootstrap_ready.rc == 0
     - bootstrap_ready.stdout == "True"
 
 ################################################################################
-# Display node information
+# Display Cluster Nodes
 ################################################################################
 
-- name: Display bootstrap node status
+- name: Display cluster nodes
   ansible.builtin.command:
     cmd: >
       kubectl
       --kubeconfig={{ bootstrap_admin_conf_path }}
       get nodes -o wide
-
-  register: node_status
-
+  register: cluster_nodes
   changed_when: false
 
 ################################################################################
-# Report success
+# Display System Pods
 ################################################################################
 
-- name: Report API server health
+- name: Display kube-system pods
+  ansible.builtin.command:
+    cmd: >
+      kubectl
+      --kubeconfig={{ bootstrap_admin_conf_path }}
+      get pods -n kube-system
+  register: system_pods
+  changed_when: false
+
+################################################################################
+# Report Cluster Status
+################################################################################
+
+- name: Report bootstrap status
   ansible.builtin.debug:
-    var: node_status.stdout_lines
+    msg:
+      - "Bootstrap control-plane is Ready."
+      - ""
+      - "Cluster Nodes:"
+      - "{{ cluster_nodes.stdout_lines }}"
+      - ""
+      - "Kube-System Pods:"
+      - "{{ system_pods.stdout_lines }}"

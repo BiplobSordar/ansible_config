@@ -1,14 +1,18 @@
 ###############################################################################
-# Join Control Plane Defaults
+# Join Additional Control Plane Defaults
 ###############################################################################
 
-join_marker_path: /etc/kubernetes/.ansible-join-complete
+###############################################################################
+# Join State
+###############################################################################
+
+join_marker_path: /etc/kubernetes/.ansible-control-plane-join-complete
 
 join_admin_conf_path: /etc/kubernetes/admin.conf
 
 
 ###############################################################################
-# Local Artifacts
+# Local Artifact
 ###############################################################################
 
 control_plane_join_command_path: "{{ local_artifacts_dir }}/control-plane-join-command.sh"
@@ -16,15 +20,33 @@ control_plane_join_command_path: "{{ local_artifacts_dir }}/control-plane-join-c
 
 ###############################################################################
 # AWS SSM
+#
+# Terraform creates this parameter.
+#
+# Bootstrap updates the value.
+#
+# Contains full kubeadm join command:
+#
+# kubeadm join <endpoint>:6443 \
+#   --token xxxx \
+#   --discovery-token-ca-cert-hash sha256:xxxx \
+#   --control-plane \
+#   --certificate-key xxxx
+#
 ###############################################################################
 
 kubeadm_control_plane_join_parameter: ""
 
-kubeadm_certificate_key_parameter: ""
+
+###############################################################################
+# Join Source
+###############################################################################
+
+join_use_ssm_fallback: true
 
 
 ###############################################################################
-# Wait
+# Kubernetes Ready Wait
 ###############################################################################
 
 join_ready_wait_retries: 30
@@ -33,16 +55,9 @@ join_ready_wait_delay: 10
 
 
 ###############################################################################
-# etcd
+# Etcd Validation
 ###############################################################################
 
 join_etcd_wait_retries: 18
 
 join_etcd_wait_delay: 10
-
-
-###############################################################################
-# Recovery
-###############################################################################
-
-join_use_ssm_fallback: true

@@ -7,7 +7,7 @@ Input:
     terraform/outputs.json
 
 Output:
-    group_vars/all.yml
+    group_vars/all/terraform.yml
 """
 
 import json
@@ -29,7 +29,8 @@ OUTPUT_FILE = (
     BASE_DIR
     / "inventory"
     / "group_vars"
-    / "all.yml"
+    / "all"
+    / "terraform.yml"
 )
 
 

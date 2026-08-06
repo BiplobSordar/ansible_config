@@ -1,11 +1,23 @@
 ---
-# roles/bootstrap_control_plane/tasks/fetch_artifacts.yml
+###############################################################################
+# Fetch Kubernetes Cluster Artifacts
 #
-# Pulls admin.conf and join-command artifacts back to the Ansible control
-# node so join_control_plane / join_workers roles (running against different
-# hosts) can consume them via ansible.builtin.copy or lookup('file', ...).
+# Pull cluster artifacts from the bootstrap control-plane node to the
+# Ansible control node.
+#
+# These artifacts are later consumed by:
+#
+#   • join_control_plane
+#   • join_workers
+#   • kubectl administration
+#
+###############################################################################
 
-- name: Ensure local artifacts directory exists on the control node
+################################################################################
+# Ensure Local Artifact Directory Exists
+################################################################################
+
+- name: Ensure local artifacts directory exists
   ansible.builtin.file:
     path: "{{ local_artifacts_dir }}"
     state: directory
@@ -13,38 +25,67 @@
   delegate_to: localhost
   become: false
 
-- name: Fetch admin.conf to the control node
+################################################################################
+# Fetch admin.conf
+################################################################################
+
+- name: Fetch admin.conf
   ansible.builtin.fetch:
     src: "{{ bootstrap_admin_conf_path }}"
     dest: "{{ admin_kubeconfig_path }}"
     flat: true
-    mode: "0600"
 
-- name: Fetch worker join command to the control node
+################################################################################
+# Fetch worker join command
+################################################################################
+
+- name: Fetch worker join command
   ansible.builtin.fetch:
-    src: /etc/kubernetes/worker-join-command.sh
+    src: "{{ bootstrap_worker_join_command_path }}"
     dest: "{{ worker_join_command_path }}"
     flat: true
-    mode: "0700"
 
-- name: Fetch control-plane join command to the control node
+################################################################################
+# Fetch control-plane join command
+################################################################################
+
+- name: Fetch control-plane join command
   ansible.builtin.fetch:
-    src: /etc/kubernetes/control-plane-join-command.sh
+    src: "{{ bootstrap_control_plane_join_command_path }}"
     dest: "{{ control_plane_join_command_path }}"
     flat: true
-    mode: "0700"
 
-- name: Fetch certificate key to the control node
+################################################################################
+# Fetch certificate key
+################################################################################
+
+- name: Fetch certificate key
   ansible.builtin.fetch:
-    src: /etc/kubernetes/certificate-key.txt
+    src: "{{ bootstrap_certificate_key_path }}"
     dest: "{{ certificate_key_path }}"
     flat: true
-    mode: "0600"
 
-- name: Lock down local artifacts directory permissions
+################################################################################
+# Secure Local Artifact Directory
+################################################################################
+
+- name: Secure local artifacts directory
   ansible.builtin.file:
     path: "{{ local_artifacts_dir }}"
     state: directory
     mode: "0700"
   delegate_to: localhost
   become: false
+
+################################################################################
+# Report
+################################################################################
+
+- name: Report fetched artifacts
+  ansible.builtin.debug:
+    msg:
+      - "Artifacts downloaded successfully."
+      - "admin.conf"
+      - "worker-join-command.sh"
+      - "control-plane-join-command.sh"
+      - "certificate-key.txt"

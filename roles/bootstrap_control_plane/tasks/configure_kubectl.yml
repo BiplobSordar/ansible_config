@@ -2,15 +2,15 @@
 ###############################################################################
 # Configure kubectl
 #
-# After kubeadm init completes, Kubernetes generates admin.conf.
+# After kubeadm init completes, Kubernetes creates admin.conf.
 #
 # This task:
 #
-#   • Creates /root/.kube
-#   • Installs admin.conf as /root/.kube/config
-#   • Verifies kubectl can communicate with the API server
+# 1. Creates /root/.kube
+# 2. Installs admin.conf as the default kubeconfig
+# 3. Verifies kubectl can communicate with the cluster
 #
-# Safe to run multiple times.
+# Safe to execute multiple times.
 ###############################################################################
 
 ################################################################################
@@ -39,18 +39,30 @@
     mode: "0600"
 
 ################################################################################
-# Verify kubectl configuration
+# Verify kubectl installation
 ################################################################################
 
-- name: Verify kubectl can communicate with the API server
+- name: Verify kubectl client
   ansible.builtin.command:
-    cmd: kubectl --kubeconfig={{ bootstrap_admin_conf_path }} version --client
+    cmd: kubectl version --client
   changed_when: false
 
 ################################################################################
-# Report success
+# Verify cluster connectivity
+################################################################################
+
+- name: Verify kubectl cluster access
+  ansible.builtin.command:
+    cmd: kubectl --kubeconfig=/root/.kube/config cluster-info
+  register: kubectl_cluster_info
+  changed_when: false
+
+################################################################################
+# Report
 ################################################################################
 
 - name: Report kubectl configuration
   ansible.builtin.debug:
-    msg: "kubectl has been configured successfully on the bootstrap control-plane node."
+    msg:
+      - "kubectl configured successfully."
+      - "{{ kubectl_cluster_info.stdout }}"

@@ -1,20 +1,6 @@
 ---
 ###############################################################################
 # Bootstrap the First Kubernetes Control Plane
-#
-# This role MUST run only on the first control-plane node.
-#
-# Responsibilities
-#
-# 1. Verify this play targets exactly one host.
-# 2. Determine whether the cluster is already bootstrapped.
-# 3. Render the kubeadm configuration.
-# 4. Execute kubeadm init (first run only).
-# 5. Configure kubectl.
-# 6. Wait for the Kubernetes API Server.
-# 7. Generate fresh join credentials.
-# 8. Store join credentials in AWS SSM Parameter Store.
-# 9. Fetch cluster artifacts to the Ansible control node.
 ###############################################################################
 
 ################################################################################
@@ -27,7 +13,6 @@
       - ansible_play_hosts | length == 1
     fail_msg: >
       bootstrap_control_plane must run against exactly one host.
-      Verify playbooks/04-bootstrap-control-plane.yml.
 
 ################################################################################
 # Determine Bootstrap State
@@ -39,7 +24,7 @@
   register: bootstrap_marker
 
 ################################################################################
-# Generate kubeadm configuration
+# Render kubeadm configuration
 ################################################################################
 
 - name: Render kubeadm init configuration
@@ -51,25 +36,21 @@
     mode: "0600"
 
 ################################################################################
-# Initialize Cluster
+# Bootstrap Cluster
 ################################################################################
 
 - name: Initialize Kubernetes control plane
   ansible.builtin.command:
-
     cmd: >
       kubeadm init
       --config {{ bootstrap_kubeadm_config_path }}
       {{ '--upload-certs' if bootstrap_upload_certs else '' }}
-
   register: kubeadm_init_result
-
   when: not bootstrap_marker.stat.exists
-
   changed_when: true
 
 ################################################################################
-# Bootstrap Marker
+# Create Bootstrap Marker
 ################################################################################
 
 - name: Create bootstrap marker
@@ -80,7 +61,6 @@
     owner: root
     group: root
     mode: "0600"
-
   when: not bootstrap_marker.stat.exists
 
 ################################################################################
@@ -91,21 +71,21 @@
   ansible.builtin.include_tasks: configure_kubectl.yml
 
 ################################################################################
-# Wait until API Server is healthy
+# Wait for Kubernetes API
 ################################################################################
 
-- name: Wait for Kubernetes API
+- name: Wait for API server
   ansible.builtin.include_tasks: wait_for_api.yml
 
 ################################################################################
 # Generate Join Credentials
 ################################################################################
 
-- name: Generate fresh join credentials
+- name: Generate join credentials
   ansible.builtin.include_tasks: generate_join_credentials.yml
 
 ################################################################################
-# Save Join Credentials into AWS SSM
+# Store Join Credentials in AWS SSM
 ################################################################################
 
 - name: Store join credentials in AWS SSM
@@ -117,3 +97,14 @@
 
 - name: Fetch cluster artifacts
   ansible.builtin.include_tasks: fetch_artifacts.yml
+
+################################################################################
+# Report
+################################################################################
+
+- name: Bootstrap completed
+  ansible.builtin.debug:
+    msg:
+      - "Bootstrap control plane completed successfully."
+      - "Cluster: {{ cluster_name }}"
+      - "Node: {{ inventory_hostname }}"

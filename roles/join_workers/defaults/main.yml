@@ -3,7 +3,12 @@
 ###############################################################################
 
 
-worker_join_marker_path: /etc/kubernetes/.ansible-join-complete
+###############################################################################
+# Join State
+###############################################################################
+
+worker_join_marker_path: /etc/kubernetes/.ansible-worker-join-complete
+
 
 
 ###############################################################################
@@ -15,10 +20,27 @@ worker_join_command_path: "{{ local_artifacts_dir }}/worker-join-command.sh"
 
 
 ###############################################################################
-# AWS SSM fallback
+# AWS SSM
+#
+# Terraform creates this parameter.
+#
+# Bootstrap updates this value.
+#
+# Contains:
+#
+# kubeadm join <control-plane-endpoint>:6443
+# --token xxxx
+# --discovery-token-ca-cert-hash sha256:xxxx
+#
 ###############################################################################
 
 worker_join_ssm_parameter: ""
+
+
+
+###############################################################################
+# Join Source
+###############################################################################
 
 worker_join_use_ssm_fallback: true
 
@@ -35,7 +57,10 @@ worker_ready_wait_delay: 10
 
 
 ###############################################################################
-# Control Plane kubeconfig
+# Kubernetes Admin Config
+#
+# Used from existing control-plane node
+#
 ###############################################################################
 
 worker_admin_conf_path_on_control_plane: /etc/kubernetes/admin.conf

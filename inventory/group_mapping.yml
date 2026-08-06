@@ -1,0 +1,11 @@
+plugin: constructed
+
+groups:
+
+
+  control_plane: >
+    role_name == "control_plane"
+
+
+  worker: >
+    role_name == "worker"

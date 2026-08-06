@@ -6,6 +6,6 @@
   any_errors_fatal: true
 
   roles:
-    - role: cni
+    - role: install_cni
       tags:
         - cni

@@ -81,6 +81,10 @@ keyed_groups:
     prefix: env
     separator: "_"
 
+  - key: tags.Bootstrap
+    prefix: bootstrap
+    separator: "_"
+
 ###############################################################################
 # Inventory Options
 ###############################################################################

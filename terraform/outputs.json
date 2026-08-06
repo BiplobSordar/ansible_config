@@ -1,0 +1,271 @@
+{
+  "alb_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:elasticloadbalancing:ap-southeast-1:662896783767:loadbalancer/app/k8s-pr-alb/077755d93006dcd7"
+  },
+  "alb_dns_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "k8s-pr-alb-1979791361.ap-southeast-1.elb.amazonaws.com"
+  },
+  "alb_security_group_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "sg-0a9371afaf4bd9454"
+  },
+  "alb_zone_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "Z1LMS91P8CMLE5"
+  },
+  "availability_zones": {
+    "sensitive": false,
+    "type": [
+      "list",
+      "string"
+    ],
+    "value": [
+      "ap-southeast-1a",
+      "ap-southeast-1b",
+      "ap-southeast-1c"
+    ]
+  },
+  "aws_region": {
+    "sensitive": false,
+    "type": "string",
+    "value": "ap-southeast-1"
+  },
+  "cluster_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "k8s-pr"
+  },
+  "control_plane_instance_ids": {
+    "sensitive": false,
+    "type": [
+      "object",
+      {
+        "control-plane-1": "string",
+        "control-plane-2": "string",
+        "control-plane-3": "string"
+      }
+    ],
+    "value": {
+      "control-plane-1": "i-0519ccf2cdbe2446d",
+      "control-plane-2": "i-04e2d7aa3c6d24922",
+      "control-plane-3": "i-0aea39dc60ff831ab"
+    }
+  },
+  "control_plane_instance_profile": {
+    "sensitive": false,
+    "type": "string",
+    "value": "k8s-pr-control-plane-profile"
+  },
+  "control_plane_private_ip_list": {
+    "sensitive": false,
+    "type": [
+      "tuple",
+      [
+        "string",
+        "string",
+        "string"
+      ]
+    ],
+    "value": [
+      "10.0.10.32",
+      "10.0.11.12",
+      "10.0.12.25"
+    ]
+  },
+  "control_plane_private_ips": {
+    "sensitive": false,
+    "type": [
+      "object",
+      {
+        "control-plane-1": "string",
+        "control-plane-2": "string",
+        "control-plane-3": "string"
+      }
+    ],
+    "value": {
+      "control-plane-1": "10.0.10.32",
+      "control-plane-2": "10.0.11.12",
+      "control-plane-3": "10.0.12.25"
+    }
+  },
+  "control_plane_security_group_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "sg-0f5aa819956e63c6b"
+  },
+  "environment": {
+    "sensitive": false,
+    "type": "string",
+    "value": "pr"
+  },
+  "igw_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "igw-0db29f84ab8dd4d6d"
+  },
+  "jenkins_instance_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "i-0652cf2d35476a1b6"
+  },
+  "jenkins_private_dns": {
+    "sensitive": false,
+    "type": "string",
+    "value": "ip-10-0-0-52.ap-southeast-1.compute.internal"
+  },
+  "jenkins_private_ip": {
+    "sensitive": false,
+    "type": "string",
+    "value": "10.0.0.52"
+  },
+  "jenkins_public_dns": {
+    "sensitive": false,
+    "type": "string",
+    "value": "ec2-52-221-213-57.ap-southeast-1.compute.amazonaws.com"
+  },
+  "jenkins_public_ip": {
+    "sensitive": false,
+    "type": "string",
+    "value": "52.221.213.57"
+  },
+  "jenkins_security_group_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "sg-0ccdc22bf0fc389ce"
+  },
+  "kubeadm_certificate_key_parameter": {
+    "sensitive": false,
+    "type": "string",
+    "value": "/kubernetes/pr/kubeadm-certificate-key"
+  },
+  "kubeadm_worker_join_parameter": {
+    "sensitive": false,
+    "type": "string",
+    "value": "/kubernetes/pr/kubeadm-worker-join"
+  },
+  "nat_gateway_ids": {
+    "sensitive": false,
+    "type": [
+      "object",
+      {
+        "ap-southeast-1a": "string",
+        "ap-southeast-1b": "string",
+        "ap-southeast-1c": "string"
+      }
+    ],
+    "value": {
+      "ap-southeast-1a": "nat-06d196af99a40d276",
+      "ap-southeast-1b": "nat-0a0f9c8d207bbb1d0",
+      "ap-southeast-1c": "nat-07704fb79dcc7589e"
+    }
+  },
+  "nat_gateway_public_ips": {
+    "sensitive": false,
+    "type": [
+      "object",
+      {
+        "ap-southeast-1a": "string",
+        "ap-southeast-1b": "string",
+        "ap-southeast-1c": "string"
+      }
+    ],
+    "value": {
+      "ap-southeast-1a": "18.140.192.77",
+      "ap-southeast-1b": "54.251.53.213",
+      "ap-southeast-1c": "56.10.37.138"
+    }
+  },
+  "node_security_group_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "sg-020b7475575ccac44"
+  },
+  "private_subnet_ids": {
+    "sensitive": false,
+    "type": [
+      "object",
+      {
+        "ap-southeast-1a": "string",
+        "ap-southeast-1b": "string",
+        "ap-southeast-1c": "string"
+      }
+    ],
+    "value": {
+      "ap-southeast-1a": "subnet-0373e11489d8be30e",
+      "ap-southeast-1b": "subnet-0419cdb330d366743",
+      "ap-southeast-1c": "subnet-040488f9eb29d6b2f"
+    }
+  },
+  "project_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "k8s"
+  },
+  "public_subnet_ids": {
+    "sensitive": false,
+    "type": [
+      "object",
+      {
+        "ap-southeast-1a": "string",
+        "ap-southeast-1b": "string",
+        "ap-southeast-1c": "string"
+      }
+    ],
+    "value": {
+      "ap-southeast-1a": "subnet-089bd6a0b3c991147",
+      "ap-southeast-1b": "subnet-03e3b4129e64d2d2b",
+      "ap-southeast-1c": "subnet-05e1995be20715a65"
+    }
+  },
+  "target_group_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:elasticloadbalancing:ap-southeast-1:662896783767:targetgroup/k8s-pr-worker/db3fb05e26ba07ad"
+  },
+  "vpc_cidr": {
+    "sensitive": false,
+    "type": "string",
+    "value": "10.0.0.0/16"
+  },
+  "vpc_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "vpc-01b918436ca57c4a6"
+  },
+  "worker_asg_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:autoscaling:ap-southeast-1:662896783767:autoScalingGroup:f29e609e-080a-4f42-a73b-cbf26a2636c7:autoScalingGroupName/k8s-pr-worker-2026080605401612500000001a"
+  },
+  "worker_asg_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "k8s-pr-worker-2026080605401612500000001a"
+  },
+  "worker_asg_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "k8s-pr-worker-2026080605401612500000001a"
+  },
+  "worker_instance_profile": {
+    "sensitive": false,
+    "type": "string",
+    "value": "k8s-pr-worker-profile"
+  },
+  "worker_launch_template_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "lt-0230fa4ed0aa777f1"
+  },
+  "worker_launch_template_latest_version": {
+    "sensitive": false,
+    "type": "number",
+    "value": 1
+  }
+}

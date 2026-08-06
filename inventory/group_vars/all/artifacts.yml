@@ -1,0 +1,28 @@
+---
+###############################################################################
+# Cluster Artifacts
+###############################################################################
+
+local_artifacts_dir: "{{ playbook_dir }}/../.cluster-artifacts/{{ cluster_name }}"
+
+###############################################################################
+# Kubernetes Admin Configuration
+###############################################################################
+
+admin_kubeconfig_path: "{{ local_artifacts_dir }}/admin.conf"
+
+kubeconfig: "{{ admin_kubeconfig_path }}"
+
+###############################################################################
+# Join Commands
+###############################################################################
+
+worker_join_command_path: "{{ local_artifacts_dir }}/worker-join-command.sh"
+
+control_plane_join_command_path: "{{ local_artifacts_dir }}/control-plane-join-command.sh"
+
+###############################################################################
+# Certificate Key
+###############################################################################
+
+certificate_key_path: "{{ local_artifacts_dir }}/certificate-key.txt"

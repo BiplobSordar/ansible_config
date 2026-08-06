@@ -1,0 +1,78 @@
+---
+###############################################################################
+# Operating System Validation
+###############################################################################
+
+expected_os_family: "Ubuntu"
+
+expected_os_version: "26.04"
+
+expected_kernel_version: "7.0"
+
+expected_python_version: "3.14"
+
+###############################################################################
+# Kubernetes Validation
+###############################################################################
+
+expected_kubernetes_version: "1.30.14"
+
+expected_kubeadm_version: "1.30.14"
+
+expected_kubelet_version: "1.30.14"
+
+###############################################################################
+# Container Runtime Validation
+###############################################################################
+
+expected_containerd_version: "2.2.6"
+
+expected_cri_tools_version: "1.30"
+
+###############################################################################
+# Required Kernel Modules
+###############################################################################
+
+required_kernel_modules:
+
+  - overlay
+
+  - br_netfilter
+
+###############################################################################
+# Required Sysctl
+###############################################################################
+
+required_sysctl:
+
+  net.ipv4.ip_forward: 1
+
+  net.bridge.bridge-nf-call-iptables: 1
+
+  net.bridge.bridge-nf-call-ip6tables: 1
+
+###############################################################################
+# Required Packages
+###############################################################################
+
+required_packages:
+
+  - chrony
+
+  - python3
+
+  - python3-pip
+
+  - curl
+
+  - jq
+
+  - socat
+
+  - conntrack
+
+  - ethtool
+
+  - ebtables
+
+  - unzip

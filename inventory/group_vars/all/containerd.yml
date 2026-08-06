@@ -1,0 +1,10 @@
+---
+###############################################################################
+# Container Runtime
+###############################################################################
+
+containerd_socket: "unix:///run/containerd/containerd.sock"
+
+container_runtime_endpoint: "unix:///run/containerd/containerd.sock"
+
+crictl_config_file: "/etc/crictl.yaml"

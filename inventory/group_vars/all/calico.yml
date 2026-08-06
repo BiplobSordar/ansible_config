@@ -1,0 +1,8 @@
+---
+###############################################################################
+# Calico CNI
+###############################################################################
+
+calico_version: "v3.30.3"
+
+calico_manifest_url: "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/calico.yaml"

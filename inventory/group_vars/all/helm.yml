@@ -1,0 +1,78 @@
+---
+###############################################################################
+# Helm
+###############################################################################
+
+helm_version: "v3.17.3"
+
+###############################################################################
+# Helm Repositories
+###############################################################################
+
+helm_repositories:
+
+  ingress_nginx:
+    name: ingress-nginx
+    url: https://kubernetes.github.io/ingress-nginx
+
+  metrics_server:
+    name: metrics-server
+    url: https://kubernetes-sigs.github.io/metrics-server/
+
+  cert_manager:
+    name: jetstack
+    url: https://charts.jetstack.io
+
+  aws_ebs_csi:
+    name: aws-ebs-csi-driver
+    url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+
+  cluster_autoscaler:
+    name: autoscaler
+    url: https://kubernetes.github.io/autoscaler
+
+  argocd:
+    name: argo
+    url: https://argoproj.github.io/argo-helm
+
+###############################################################################
+# Helm Charts
+###############################################################################
+
+helm_charts:
+
+  ingress_nginx:
+    chart: ingress-nginx/ingress-nginx
+    version: "4.13.1"
+    namespace: ingress-nginx
+    release: ingress-nginx
+
+  metrics_server:
+    chart: metrics-server/metrics-server
+    version: "3.13.0"
+    namespace: kube-system
+    release: metrics-server
+
+  cert_manager:
+    chart: jetstack/cert-manager
+    version: "v1.18.2"
+    namespace: cert-manager
+    release: cert-manager
+
+  aws_ebs_csi:
+    chart: aws-ebs-csi-driver/aws-ebs-csi-driver
+    version: "2.41.0"
+    namespace: kube-system
+    release: aws-ebs-csi-driver
+
+  cluster_autoscaler:
+    chart: autoscaler/cluster-autoscaler
+    version: "9.46.6"
+    namespace: kube-system
+    release: cluster-autoscaler
+
+  argocd:
+    chart: argo/argo-cd
+    version: "8.3.0"
+    namespace: argocd
+    release: argocd

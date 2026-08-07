@@ -1,4 +1,3 @@
----
 # roles/kubernetes/tasks/verify_kubelet.yml
 
 - name: Check kubelet binary exists
@@ -24,15 +23,15 @@
   ansible.builtin.set_fact:
     kubelet_version_parsed: >-
       {{
-        kubelet_version_raw.stdout
-        | regex_search('v([0-9.]+)','\\1')
-        | first
+        kubelet_version_raw.stdout.split()[-1]
+        | regex_replace('^v', '')
+        | trim
       }}
 
 - name: Assert kubelet version
   ansible.builtin.assert:
     that:
-      - kubelet_version_parsed is version(kubernetes_expected_version,'==')
+      - kubelet_version_parsed is version(kubernetes_expected_version, '==')
     fail_msg: >
       kubelet version {{ kubelet_version_parsed }}
       does not match {{ kubernetes_expected_version }}

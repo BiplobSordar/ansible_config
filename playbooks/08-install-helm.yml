@@ -1,35 +1,21 @@
 ---
-###############################################################################
-# Install Helm CLI
-#
-# Runs ONLY on bootstrap control-plane node.
-#
-# Responsibilities:
-#
-# - Install Helm binary
-# - Verify Helm version
-#
-# Does NOT install Kubernetes applications.
-#
-###############################################################################
-
-
 - name: Install Helm CLI
-
   hosts: bootstrap
-
   become: true
-
   gather_facts: true
+  any_errors_fatal: true
 
+  vars_files:
+    - vars/defaults.yml
+    - vars/terraform.yml
+    - vars/kubernetes.yml
+    - vars/containerd.yml
+    - vars/calico.yml
+    - vars/helm.yml
+    - vars/validation.yml
+    - vars/artifacts.yml
 
   roles:
-
     - role: install_helm
-
-
-  tags:
-
-    - helm
-
-    - helm_cli
+      tags:
+        - helm

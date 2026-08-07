@@ -1,9 +1,19 @@
 ---
 - name: Bootstrap Kubernetes Cluster
   hosts: bootstrap
-
+  become: true
   gather_facts: true
   any_errors_fatal: true
+
+  vars_files:
+    - vars/defaults.yml
+    - vars/terraform.yml
+    - vars/kubernetes.yml
+    - vars/containerd.yml
+    - vars/calico.yml
+    - vars/helm.yml
+    - vars/validation.yml
+    - vars/artifacts.yml
 
   roles:
     - role: bootstrap_control_plane

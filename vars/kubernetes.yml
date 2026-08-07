@@ -11,7 +11,7 @@ kubernetes_apt_series: "1.30"
 # Control Plane
 ###############################################################################
 
-control_plane_endpoint: "{{ hostvars[groups['bootstrap_true'][0]].ansible_host }}"
+control_plane_endpoint: "{{ hostvars[groups['bootstrap'][0]].ansible_host }}"
 
 control_plane_endpoint_port: 6443
 
@@ -22,3 +22,6 @@ control_plane_endpoint_port: 6443
 containerd_socket: "unix:///run/containerd/containerd.sock"
 
 crictl_config_file: "/etc/crictl.yaml"
+
+pod_network_cidr: "192.168.0.0/16"
+service_cidr: "10.96.0.0/12"

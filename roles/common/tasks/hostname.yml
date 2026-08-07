@@ -1,0 +1,5 @@
+---
+- name: Set system hostname from Terraform Node tag
+  become: true
+  ansible.builtin.hostname:
+    name: "{{ ec2_tags.Node }}"

@@ -1,9 +1,5 @@
 ---
 # roles/common/tasks/main.yml
-#
-# Verifies baseline OS/runtime prerequisites already provisioned by the
-# Golden AMI. This role NEVER installs or modifies packages - it only checks
-# state and fails fast (via assertions) when the AMI drifts from spec.
 
 - name: Gather minimal facts required for verification
   ansible.builtin.setup:
@@ -12,35 +8,15 @@
       - "min"
       - "distribution"
       - "kernel"
-  tags: [common, facts]
+  tags:
+    - common
+    - facts
 
-- name: Include OS and kernel verification
-  ansible.builtin.include_tasks: verify_os.yml
-  tags: [common, verify, os]
-
-- name: Include swap verification
-  ansible.builtin.include_tasks: verify_swap.yml
-  tags: [common, verify, swap]
-
-- name: Include kernel module verification
-  ansible.builtin.include_tasks: verify_kernel_modules.yml
-  tags: [common, verify, kernel]
-
-- name: Include sysctl verification
-  ansible.builtin.include_tasks: verify_sysctl.yml
-  tags: [common, verify, sysctl]
-
-- name: Include chrony verification
-  ansible.builtin.include_tasks: verify_chrony.yml
-  tags: [common, verify, chrony]
-
-- name: Include Python interpreter verification
-  ansible.builtin.include_tasks: verify_python.yml
-  tags: [common, verify, python]
-
-- name: Include required package verification
-  ansible.builtin.include_tasks: verify_packages.yml
-  tags: [common, verify, packages]
+- name: Set system hostname
+  ansible.builtin.import_tasks: hostname.yml
+  tags:
+    - common
+    - hostname
 
 - name: Include hostname verification
   ansible.builtin.include_tasks: verify_hostname.yml
@@ -48,3 +24,52 @@
     - common
     - verify
     - hostname
+
+- name: Include OS and kernel verification
+  ansible.builtin.include_tasks: verify_os.yml
+  tags:
+    - common
+    - verify
+    - os
+
+- name: Include swap verification
+  ansible.builtin.include_tasks: verify_swap.yml
+  tags:
+    - common
+    - verify
+    - swap
+
+- name: Include kernel module verification
+  ansible.builtin.include_tasks: verify_kernel_modules.yml
+  tags:
+    - common
+    - verify
+    - kernel
+
+- name: Include sysctl verification
+  ansible.builtin.include_tasks: verify_sysctl.yml
+  tags:
+    - common
+    - verify
+    - sysctl
+
+- name: Include chrony verification
+  ansible.builtin.include_tasks: verify_chrony.yml
+  tags:
+    - common
+    - verify
+    - chrony
+
+- name: Include Python interpreter verification
+  ansible.builtin.include_tasks: verify_python.yml
+  tags:
+    - common
+    - verify
+    - python
+
+- name: Include required package verification
+  ansible.builtin.include_tasks: verify_packages.yml
+  tags:
+    - common
+    - verify
+    - packages

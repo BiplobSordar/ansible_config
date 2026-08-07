@@ -15,12 +15,12 @@ hostnames:
 compose:
   ansible_host: private_ip_address
 
-  node_name: tags.Node | default("")
-  role_name: tags.Role | default("")
-  cluster_name: tags.Cluster | default("")
+  node_name: ec2_tags.Node | default("")
+  role_name: ec2_tags.Role | default("")
+  cluster_name: ec2_tags.Cluster | default("")
 
   instance_id: instance_id
-  instance_name: tags.Name | default("")
+  instance_name: ec2_tags.Name | default("")
   private_ip: private_ip_address
   public_ip: public_ip_address | default("")
   private_dns: private_dns_name | default("")
@@ -36,19 +36,19 @@ compose:
   instance_type: instance_type
   architecture: architecture
 
-  project: tags.Project | default("")
-  environment: tags.Environment | default("")
-  cluster: tags.Cluster | default("")
-  role: tags.Role | default("")
-  bootstrap: tags.Bootstrap | default("false")
-  managed_by: tags.ManagedBy | default("")
-  owner: tags.Owner | default("")
+  project: ec2_tags.Project | default("")
+  environment_name: ec2_tags.Environment | default("")
+  cluster: ec2_tags.Cluster | default("")
+  role: ec2_tags.Role | default("")
+  bootstrap: ec2_tags.Bootstrap | default("false")
+  managed_by: ec2_tags.ManagedBy | default("")
+  owner: ec2_tags.Owner | default("")
 
 groups:
-  control_plane: tags.Role == "control-plane"
-  worker: tags.Role == "worker"
-  bootstrap: tags.Bootstrap == "true"
-  jenkins: tags.Role == "jenkins"
+  control_plane: ec2_tags.Role == "control-plane"
+  worker: ec2_tags.Role == "worker"
+  bootstrap: ec2_tags.Bootstrap == "true"
+  jenkins: ec2_tags.Role == "jenkins"
 
 strict: false
 

@@ -2,17 +2,17 @@
   "alb_arn": {
     "sensitive": false,
     "type": "string",
-    "value": "arn:aws:elasticloadbalancing:ap-southeast-1:662896783767:loadbalancer/app/k8s-pr-alb/077755d93006dcd7"
+    "value": "arn:aws:elasticloadbalancing:ap-southeast-1:662896783767:loadbalancer/app/k8s-pr-alb/2a9cb40d114db638"
   },
   "alb_dns_name": {
     "sensitive": false,
     "type": "string",
-    "value": "k8s-pr-alb-1979791361.ap-southeast-1.elb.amazonaws.com"
+    "value": "k8s-pr-alb-364078420.ap-southeast-1.elb.amazonaws.com"
   },
   "alb_security_group_id": {
     "sensitive": false,
     "type": "string",
-    "value": "sg-0a9371afaf4bd9454"
+    "value": "sg-02e35de260e88311f"
   },
   "alb_zone_id": {
     "sensitive": false,
@@ -52,9 +52,9 @@
       }
     ],
     "value": {
-      "control-plane-1": "i-0519ccf2cdbe2446d",
-      "control-plane-2": "i-04e2d7aa3c6d24922",
-      "control-plane-3": "i-0aea39dc60ff831ab"
+      "control-plane-1": "i-0c7f0bccd2b015398",
+      "control-plane-2": "i-01c51581ccd0558b3",
+      "control-plane-3": "i-0ed8b94e8fab18f78"
     }
   },
   "control_plane_instance_profile": {
@@ -73,9 +73,9 @@
       ]
     ],
     "value": [
-      "10.0.10.32",
-      "10.0.11.12",
-      "10.0.12.25"
+      "10.0.10.169",
+      "10.0.11.156",
+      "10.0.12.49"
     ]
   },
   "control_plane_private_ips": {
@@ -89,15 +89,15 @@
       }
     ],
     "value": {
-      "control-plane-1": "10.0.10.32",
-      "control-plane-2": "10.0.11.12",
-      "control-plane-3": "10.0.12.25"
+      "control-plane-1": "10.0.10.169",
+      "control-plane-2": "10.0.11.156",
+      "control-plane-3": "10.0.12.49"
     }
   },
   "control_plane_security_group_id": {
     "sensitive": false,
     "type": "string",
-    "value": "sg-0f5aa819956e63c6b"
+    "value": "sg-0e93f8b3e815e53e3"
   },
   "environment": {
     "sensitive": false,
@@ -107,42 +107,47 @@
   "igw_id": {
     "sensitive": false,
     "type": "string",
-    "value": "igw-0db29f84ab8dd4d6d"
+    "value": "igw-09c9b22f887414ad8"
   },
   "jenkins_instance_id": {
     "sensitive": false,
     "type": "string",
-    "value": "i-0652cf2d35476a1b6"
+    "value": "i-06395b0d1eebdb46c"
   },
   "jenkins_private_dns": {
     "sensitive": false,
     "type": "string",
-    "value": "ip-10-0-0-52.ap-southeast-1.compute.internal"
+    "value": "ip-10-0-0-45.ap-southeast-1.compute.internal"
   },
   "jenkins_private_ip": {
     "sensitive": false,
     "type": "string",
-    "value": "10.0.0.52"
+    "value": "10.0.0.45"
   },
   "jenkins_public_dns": {
     "sensitive": false,
     "type": "string",
-    "value": "ec2-52-221-213-57.ap-southeast-1.compute.amazonaws.com"
+    "value": "ec2-13-250-18-17.ap-southeast-1.compute.amazonaws.com"
   },
   "jenkins_public_ip": {
     "sensitive": false,
     "type": "string",
-    "value": "52.221.213.57"
+    "value": "13.250.18.17"
   },
   "jenkins_security_group_id": {
     "sensitive": false,
     "type": "string",
-    "value": "sg-0ccdc22bf0fc389ce"
+    "value": "sg-0f78c3813ef81589d"
   },
-  "kubeadm_certificate_key_parameter": {
+  "kubeadm_certificate_key_parameter_name": {
     "sensitive": false,
     "type": "string",
     "value": "/kubernetes/pr/kubeadm-certificate-key"
+  },
+  "kubeadm_control_plane_join_parameter": {
+    "sensitive": false,
+    "type": "string",
+    "value": "/kubernetes/pr/kubeadm-control-plane-join"
   },
   "kubeadm_worker_join_parameter": {
     "sensitive": false,
@@ -160,9 +165,9 @@
       }
     ],
     "value": {
-      "ap-southeast-1a": "nat-06d196af99a40d276",
-      "ap-southeast-1b": "nat-0a0f9c8d207bbb1d0",
-      "ap-southeast-1c": "nat-07704fb79dcc7589e"
+      "ap-southeast-1a": "nat-0907381e9beaa250a",
+      "ap-southeast-1b": "nat-0ad6abd3b7b172f5d",
+      "ap-southeast-1c": "nat-00f097b2a4b1836d6"
     }
   },
   "nat_gateway_public_ips": {
@@ -176,15 +181,15 @@
       }
     ],
     "value": {
-      "ap-southeast-1a": "18.140.192.77",
-      "ap-southeast-1b": "54.251.53.213",
-      "ap-southeast-1c": "56.10.37.138"
+      "ap-southeast-1a": "52.220.86.196",
+      "ap-southeast-1b": "3.0.65.160",
+      "ap-southeast-1c": "54.254.155.209"
     }
   },
   "node_security_group_id": {
     "sensitive": false,
     "type": "string",
-    "value": "sg-020b7475575ccac44"
+    "value": "sg-02899f378675076aa"
   },
   "private_subnet_ids": {
     "sensitive": false,
@@ -197,9 +202,9 @@
       }
     ],
     "value": {
-      "ap-southeast-1a": "subnet-0373e11489d8be30e",
-      "ap-southeast-1b": "subnet-0419cdb330d366743",
-      "ap-southeast-1c": "subnet-040488f9eb29d6b2f"
+      "ap-southeast-1a": "subnet-05847f4cfb209123a",
+      "ap-southeast-1b": "subnet-0cb514f7add0e5ffe",
+      "ap-southeast-1c": "subnet-00b00c257cb31acd7"
     }
   },
   "project_name": {
@@ -218,15 +223,15 @@
       }
     ],
     "value": {
-      "ap-southeast-1a": "subnet-089bd6a0b3c991147",
-      "ap-southeast-1b": "subnet-03e3b4129e64d2d2b",
-      "ap-southeast-1c": "subnet-05e1995be20715a65"
+      "ap-southeast-1a": "subnet-05b1a92b7b40c1aeb",
+      "ap-southeast-1b": "subnet-057573c08788732e0",
+      "ap-southeast-1c": "subnet-0fc9fda068284e0a1"
     }
   },
   "target_group_arn": {
     "sensitive": false,
     "type": "string",
-    "value": "arn:aws:elasticloadbalancing:ap-southeast-1:662896783767:targetgroup/k8s-pr-worker/db3fb05e26ba07ad"
+    "value": "arn:aws:elasticloadbalancing:ap-southeast-1:662896783767:targetgroup/k8s-pr-worker/aaf9294b1c20ef6c"
   },
   "vpc_cidr": {
     "sensitive": false,
@@ -236,22 +241,22 @@
   "vpc_id": {
     "sensitive": false,
     "type": "string",
-    "value": "vpc-01b918436ca57c4a6"
+    "value": "vpc-0c1e8c58dcd65312f"
   },
   "worker_asg_arn": {
     "sensitive": false,
     "type": "string",
-    "value": "arn:aws:autoscaling:ap-southeast-1:662896783767:autoScalingGroup:f29e609e-080a-4f42-a73b-cbf26a2636c7:autoScalingGroupName/k8s-pr-worker-2026080605401612500000001a"
+    "value": "arn:aws:autoscaling:ap-southeast-1:662896783767:autoScalingGroup:5eeec005-b7cf-4ab6-b4a4-6f28ddc1779b:autoScalingGroupName/k8s-pr-worker-2026080612591275350000001a"
   },
   "worker_asg_id": {
     "sensitive": false,
     "type": "string",
-    "value": "k8s-pr-worker-2026080605401612500000001a"
+    "value": "k8s-pr-worker-2026080612591275350000001a"
   },
   "worker_asg_name": {
     "sensitive": false,
     "type": "string",
-    "value": "k8s-pr-worker-2026080605401612500000001a"
+    "value": "k8s-pr-worker-2026080612591275350000001a"
   },
   "worker_instance_profile": {
     "sensitive": false,
@@ -261,7 +266,7 @@
   "worker_launch_template_id": {
     "sensitive": false,
     "type": "string",
-    "value": "lt-0230fa4ed0aa777f1"
+    "value": "lt-017bedb8dee49fb7b"
   },
   "worker_launch_template_latest_version": {
     "sensitive": false,

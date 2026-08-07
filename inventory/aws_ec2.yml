@@ -1,88 +1,66 @@
 ---
-###############################################################################
-# AWS EC2 Dynamic Inventory
-#
-# Production Dynamic Inventory
-# Kubernetes Cluster on AWS
-###############################################################################
-
 plugin: amazon.aws.aws_ec2
 
-###############################################################################
-# AWS Region
-###############################################################################
 
 regions:
+
   - ap-southeast-1
 
-###############################################################################
-# EC2 Discovery
-###############################################################################
+
 
 filters:
+
   instance-state-name: running
+
   tag:Project: "k8s"
+
   tag:Environment: "pr"
 
-###############################################################################
-# Host Variables
-###############################################################################
+
 
 compose:
 
-  #########################################################################
-  # SSH
-  #########################################################################
-
   ansible_host: private_ip_address
 
-  #########################################################################
-  # EC2 Metadata
-  #########################################################################
 
-  instance_id: instance_id
-  private_ip: private_ip_address
-  public_ip: public_ip_address | default("")
-  availability_zone: placement.availability_zone
+  node_name: tags.Node | regex_replace('-','_')
 
-  #########################################################################
-  # AWS Tags
-  #########################################################################
 
-  instance_name: tags.Name | default("")
-  project: tags.Project | default("")
-  environment: tags.Environment | default("")
-  cluster: tags.Cluster | default("")
-  role: tags.Role | default("")
-  managed_by: tags.ManagedBy | default("")
-  bootstrap: tags.Bootstrap | default("false")
+  role_name: tags.Role | regex_replace('-','_')
 
-###############################################################################
-# Hostname
-#
-# IMPORTANT:
-# Do NOT use tag:Name because ASG workers have duplicate Name tags.
-###############################################################################
 
-hostnames:
-  - instance-id
 
-###############################################################################
-# Dynamic Groups
-###############################################################################
-
+<<<<<<< HEAD
 groups:
   control_plane: tags.Role == "control-plane"
   worker: tags.Role == "worker"
   bootstrap: tags.Bootstrap == "true"
   jenkins: tags.Role == "jenkins"
   env_pr: tags.Environment == "pr"
+=======
+keyed_groups:
 
-###############################################################################
-# Inventory Options
-###############################################################################
+
+  - key: tags.Role
+
+    prefix: raw
+
+    separator: "_"
+
+
+
+  - key: tags.Environment
+
+    prefix: env
+
+    separator: "_"
+
+>>>>>>> 7f1709627deb16d4c30f614a1cb820aaa6a2e1e6
+
 
 strict: false
+
+
 
 cache: true
 

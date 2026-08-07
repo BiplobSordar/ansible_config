@@ -8,6 +8,6 @@
   serial: 30%
 
   roles:
-    - role: worker
+    - role: join_workers
       tags:
         - worker

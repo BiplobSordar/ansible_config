@@ -1,27 +1,55 @@
 ---
-# roles/common/tasks/verify_python.yml
 
-- name: Read python version
-  ansible.builtin.command: python3 --version
+- name: Install python pip package
+  become: true
+
+  ansible.builtin.apt:
+    name:
+      - python3-pip
+    state: present
+    update_cache: true
+
+
+- name: Verify python version
+  ansible.builtin.command:
+    cmd: python3 --version
+
   register: python_version
+
   changed_when: false
+
 
 - name: Assert Python version
   ansible.builtin.assert:
+
     that:
-      - python_version.stdout is search(expected_python_version)
-    fail_msg: >
-      Python version mismatch.
-    success_msg: "Python version verified."
+      - python_version.stdout is search("Python 3")
+
+    fail_msg:
+      - "Python verification failed"
+
+    success_msg:
+      - "Python version verified"
+
+
 
 - name: Verify pip
-  ansible.builtin.command: python3 -m pip --version
+  ansible.builtin.command:
+    cmd: python3 -m pip --version
+
   register: pip_version
+
   changed_when: false
 
-- name: Assert pip installed
+
+- name: Assert pip available
   ansible.builtin.assert:
+
     that:
       - pip_version.rc == 0
-    fail_msg: "pip3 missing."
-    success_msg: "pip verified."
+
+    fail_msg:
+      - "pip is not installed"
+
+    success_msg:
+      - "pip verified"

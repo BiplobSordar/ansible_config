@@ -21,13 +21,22 @@
   register: kubeadm_version_raw
   changed_when: false
 
+- name: Parse kubeadm version
+  ansible.builtin.set_fact:
+    kubeadm_version_parsed: >-
+      {{
+        kubeadm_version_raw.stdout
+        | regex_replace('^v', '')
+        | trim
+      }}
+
 - name: Assert kubeadm version
   ansible.builtin.assert:
     that:
-      - kubeadm_version_raw.stdout | regex_replace('^v','') is version(kubernetes_expected_version,'==')
+      - kubeadm_version_parsed is version(kubernetes_expected_version, '==')
     fail_msg: >
-      Expected {{ kubernetes_expected_version }}
-      but found {{ kubeadm_version_raw.stdout }}
+      kubeadm version {{ kubeadm_version_parsed }}
+      does not match {{ kubernetes_expected_version }}
     success_msg: >
       kubeadm version verified:
-      {{ kubeadm_version_raw.stdout }}
+      {{ kubeadm_version_parsed }}

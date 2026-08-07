@@ -23,17 +23,15 @@
   ansible.builtin.set_fact:
     kubectl_version_parsed: >-
       {{
-        (
-          kubectl_version_raw.stdout
-          | from_json
-        ).clientVersion.gitVersion
-        | regex_replace('^v','')
+        (kubectl_version_raw.stdout | from_json).clientVersion.gitVersion
+        | regex_replace('^v', '')
+        | trim
       }}
 
 - name: Assert kubectl version
   ansible.builtin.assert:
     that:
-      - kubectl_version_parsed is version(kubernetes_expected_version,'==')
+      - kubectl_version_parsed is version(kubernetes_expected_version, '==')
     fail_msg: >
       kubectl version {{ kubectl_version_parsed }}
       does not match {{ kubernetes_expected_version }}

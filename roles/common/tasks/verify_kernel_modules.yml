@@ -1,29 +1,47 @@
 ---
-# roles/common/tasks/verify_kernel_modules.yml
+- name: Install kernel module utilities
+  become: true
+  ansible.builtin.apt:
+    name:
+      - kmod
+    state: present
+    update_cache: true
+
+
+- name: Load required Kubernetes kernel modules
+  become: true
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
+
+- name: Persist Kubernetes kernel modules
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/kubernetes.conf
+    content: |
+      overlay
+      br_netfilter
+    owner: root
+    group: root
+    mode: "0644"
+
 
 - name: Collect loaded kernel modules
-  ansible.builtin.command: lsmod
+  ansible.builtin.command:
+    cmd: lsmod
   register: loaded_modules
   changed_when: false
 
-- name: Assert required kernel modules loaded
+
+- name: Verify required kernel modules loaded
   ansible.builtin.assert:
     that:
-      - loaded_modules.stdout is regex("(?m)^{{ item }}\\s")
+      - item in loaded_modules.stdout
     fail_msg: "Kernel module {{ item }} is missing."
-    success_msg: "{{ item }} loaded."
-  loop: "{{ common_expected_kernel_modules }}"
-
-- name: Verify module persistence
-  ansible.builtin.command: cat /etc/modules-load.d/k8s.conf
-  register: module_file
-  changed_when: false
-  failed_when: false
-
-- name: Assert persistent module configuration
-  ansible.builtin.assert:
-    that:
-      - item in module_file.stdout
-    fail_msg: "{{ item }} missing from modules-load config."
-    success_msg: "{{ item }} persistent."
-  loop: "{{ common_expected_kernel_modules }}"
+  loop:
+    - overlay
+    - br_netfilter

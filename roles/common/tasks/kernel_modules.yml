@@ -1,0 +1,30 @@
+---
+- name: Create Kubernetes kernel modules configuration
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/kubernetes.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      overlay
+      br_netfilter
+
+
+- name: Load Kubernetes kernel modules
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
+
+- name: Verify kernel modules exist
+  ansible.builtin.command:
+    cmd: "modinfo {{ item }}"
+  register: kernel_module_check
+  changed_when: false
+  failed_when: kernel_module_check.rc != 0
+  loop:
+    - overlay
+    - br_netfilter

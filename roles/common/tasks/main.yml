@@ -1,9 +1,14 @@
 ---
 # roles/common/tasks/main.yml
 
+
 - name: Load all cluster variables
   ansible.builtin.include_tasks:
     file: load_vars.yml
+  tags:
+    - common
+    - vars
+
 
 - name: Gather minimal facts required for verification
   ansible.builtin.setup:
@@ -16,65 +21,115 @@
     - common
     - facts
 
+
 - name: Set hostname from Terraform Node tag (Control Plane only)
-  ansible.builtin.include_tasks: hostname.yml
+  ansible.builtin.include_tasks:
+    file: hostname.yml
   when: role_name == "control-plane"
   tags:
     - common
     - hostname
 
+
 - name: Include hostname verification (Control Plane only)
-  ansible.builtin.include_tasks: verify_hostname.yml
+  ansible.builtin.include_tasks:
+    file: verify_hostname.yml
   when: role_name == "control-plane"
   tags:
     - common
     - verify
     - hostname
 
+
 - name: Include OS and kernel verification
-  ansible.builtin.include_tasks: verify_os.yml
+  ansible.builtin.include_tasks:
+    file: verify_os.yml
   tags:
     - common
     - verify
     - os
 
+
 - name: Include swap verification
-  ansible.builtin.include_tasks: verify_swap.yml
+  ansible.builtin.include_tasks:
+    file: verify_swap.yml
   tags:
     - common
     - verify
     - swap
 
-- name: Include kernel module verification
-  ansible.builtin.include_tasks: verify_kernel_modules.yml
+
+###############################################################################
+# Kernel Modules
+###############################################################################
+
+- name: Configure Kubernetes kernel modules
+  ansible.builtin.include_tasks:
+    file: kernel_modules.yml
+  tags:
+    - common
+    - kernel
+    - configure
+
+
+- name: Verify Kubernetes kernel modules
+  ansible.builtin.include_tasks:
+    file: verify_kernel_modules.yml
   tags:
     - common
     - verify
     - kernel
 
-- name: Include sysctl verification
-  ansible.builtin.include_tasks: verify_sysctl.yml
+
+
+###############################################################################
+# Sysctl
+###############################################################################
+
+- name: Configure Kubernetes sysctl
+  ansible.builtin.include_tasks:
+    file: sysctl.yml
+  tags:
+    - common
+    - sysctl
+    - configure
+
+
+- name: Verify sysctl configuration
+  ansible.builtin.include_tasks:
+    file: verify_sysctl.yml
   tags:
     - common
     - verify
     - sysctl
 
+
+
+###############################################################################
+# Other verification
+###############################################################################
+
 - name: Include chrony verification
-  ansible.builtin.include_tasks: verify_chrony.yml
+  ansible.builtin.include_tasks:
+    file: verify_chrony.yml
   tags:
     - common
     - verify
     - chrony
 
+
 - name: Include Python interpreter verification
-  ansible.builtin.include_tasks: verify_python.yml
+  ansible.builtin.include_tasks:
+    file: verify_python.yml
   tags:
     - common
     - verify
     - python
 
+
 - name: Include required package verification
-  ansible.builtin.include_tasks: verify_packages.yml
+  ansible.builtin.include_tasks:
+    file: verify_packages.yml
   tags:
     - common
     - verify

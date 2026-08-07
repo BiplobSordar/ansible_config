@@ -1,56 +1,66 @@
 ---
+- name: Check kernel modules directory exists
+  stat:
+    path: "/lib/modules/{{ ansible_kernel }}"
+  register: kernel_modules_dir
+
+
+- name: Verify kernel modules directory exists
+  assert:
+    that:
+      - kernel_modules_dir.stat.exists
+    fail_msg: "Kernel modules directory missing for {{ ansible_kernel }}"
+
+
+- name: Check linux-modules-extra package availability
+  shell: |
+    apt-cache show linux-modules-extra-{{ ansible_kernel }}
+  register: kernel_extra_package
+  failed_when: false
+  changed_when: false
+
 
 - name: Install kernel module utilities
-  become: true
-  ansible.builtin.apt:
+  apt:
     name:
       - kmod
       - linux-modules-extra-{{ ansible_kernel }}
     state: present
-    update_cache: true
-
-
-- name: Load required Kubernetes kernel modules
-  become: true
-  community.general.modprobe:
-    name: "{{ item }}"
-    state: present
-  loop: "{{ required_kernel_modules }}"
+    update_cache: yes
+  when:
+    - kernel_extra_package.rc == 0
 
 
 - name: Persist Kubernetes kernel modules
-  become: true
-  ansible.builtin.copy:
+  copy:
     dest: /etc/modules-load.d/kubernetes.conf
-    content: |
-      {% for module in required_kernel_modules %}
-      {{ module }}
-      {% endfor %}
-    owner: root
-    group: root
     mode: "0644"
+    content: |
+      overlay
+      br_netfilter
 
 
-- name: Apply kernel modules immediately
-  become: true
-  ansible.builtin.command:
-    cmd: modprobe {{ item }}
-  loop: "{{ required_kernel_modules }}"
-  changed_when: false
+- name: Load Kubernetes kernel modules
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
 
 
 - name: Collect loaded kernel modules
-  become: true
-  ansible.builtin.command:
-    cmd: lsmod
+  shell: lsmod
   register: loaded_modules
   changed_when: false
+  check_mode: no
 
 
 - name: Verify required Kubernetes kernel modules loaded
-  ansible.builtin.assert:
+  assert:
     that:
       - item in loaded_modules.stdout
     fail_msg: "Kernel module {{ item }} is missing."
-    success_msg: "Kernel module {{ item }} is loaded."
-  loop: "{{ required_kernel_modules }}"
+  loop:
+    - overlay
+    - br_netfilter

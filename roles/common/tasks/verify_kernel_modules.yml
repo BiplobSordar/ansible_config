@@ -1,9 +1,11 @@
 ---
+
 - name: Install kernel module utilities
   become: true
   ansible.builtin.apt:
     name:
       - kmod
+      - linux-modules-extra-{{ ansible_kernel }}
     state: present
     update_cache: true
 
@@ -13,9 +15,7 @@
   community.general.modprobe:
     name: "{{ item }}"
     state: present
-  loop:
-    - overlay
-    - br_netfilter
+  loop: "{{ required_kernel_modules }}"
 
 
 - name: Persist Kubernetes kernel modules
@@ -23,23 +23,34 @@
   ansible.builtin.copy:
     dest: /etc/modules-load.d/kubernetes.conf
     content: |
-      overlay
-      br_netfilter
+      {% for module in required_kernel_modules %}
+      {{ module }}
+      {% endfor %}
     owner: root
     group: root
     mode: "0644"
 
 
+- name: Apply kernel modules immediately
+  become: true
+  ansible.builtin.command:
+    cmd: modprobe {{ item }}
+  loop: "{{ required_kernel_modules }}"
+  changed_when: false
+
+
 - name: Collect loaded kernel modules
+  become: true
   ansible.builtin.command:
     cmd: lsmod
   register: loaded_modules
   changed_when: false
 
 
-- name: Verify required kernel modules loaded
+- name: Verify required Kubernetes kernel modules loaded
   ansible.builtin.assert:
     that:
-      - item in loaded_modules.stdout_lines | map('regex_replace', '\s+.*$', '') | list
+      - item in loaded_modules.stdout
     fail_msg: "Kernel module {{ item }} is missing."
+    success_msg: "Kernel module {{ item }} is loaded."
   loop: "{{ required_kernel_modules }}"

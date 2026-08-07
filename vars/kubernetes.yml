@@ -7,6 +7,9 @@ kubernetes_version: "1.30.14"
 
 kubernetes_apt_series: "1.30"
 
+required_kernel_modules:
+  - overlay
+  - br_netfilter
 ###############################################################################
 # Control Plane
 ###############################################################################

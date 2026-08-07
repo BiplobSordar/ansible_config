@@ -1,0 +1,17 @@
+---
+
+- name: Load all cluster variables
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+    dir: "{{ playbook_dir }}/../vars"
+  loop:
+    - defaults.yml
+    - terraform.yml
+    - kubernetes.yml
+    - containerd.yml
+    - calico.yml
+    - helm.yml
+    - validation.yml
+    - artifacts.yml
+    - control_plane.yml
+    - workers.yml

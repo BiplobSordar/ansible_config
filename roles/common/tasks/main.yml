@@ -1,6 +1,10 @@
 ---
 # roles/common/tasks/main.yml
 
+- name: Load all cluster variables
+  ansible.builtin.include_tasks:
+    file: load_vars.yml
+
 - name: Gather minimal facts required for verification
   ansible.builtin.setup:
     gather_subset:

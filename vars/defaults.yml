@@ -1,4 +1,14 @@
----
+###############################################################################
+# Operating System Validation
+###############################################################################
+
+expected_os_family: "Debian"
+
+expected_distribution: "Ubuntu"
+
+expected_distribution_major_version: "24"
+
+
 ###############################################################################
 # Cluster Wait Configuration
 ###############################################################################
@@ -8,6 +18,7 @@ wait_for_node_ready_timeout: 600
 wait_for_pod_ready_timeout: 600
 
 wait_for_api_timeout: 600
+
 
 ###############################################################################
 # Rolling Join Configuration

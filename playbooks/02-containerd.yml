@@ -1,6 +1,6 @@
 ---
 - name: Verify Container Runtime
-  hosts: control_plane:workers
+  hosts: control_plane:worker
 
   gather_facts: true
   any_errors_fatal: true

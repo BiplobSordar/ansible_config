@@ -71,19 +71,12 @@ hostnames:
 # Dynamic Groups
 ###############################################################################
 
-keyed_groups:
-
-  - key: tags.Role
-    prefix: role
-    separator: "_"
-
-  - key: tags.Environment
-    prefix: env
-    separator: "_"
-
-  - key: tags.Bootstrap
-    prefix: bootstrap
-    separator: "_"
+groups:
+  control_plane: tags.Role == "control-plane"
+  worker: tags.Role == "worker"
+  bootstrap: tags.Bootstrap == "true"
+  jenkins: tags.Role == "jenkins"
+  env_pr: tags.Environment == "pr"
 
 ###############################################################################
 # Inventory Options

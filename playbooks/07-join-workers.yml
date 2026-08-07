@@ -1,6 +1,6 @@
 ---
 - name: Join Worker Nodes
-  hosts: workers
+  hosts: worker
 
   gather_facts: true
   any_errors_fatal: true

@@ -1,5 +1,6 @@
----
-- name: Set system hostname from Terraform Node tag
-  become: true
-  ansible.builtin.hostname:
-    name: "{{ ec2_tags.Node }}"
+- name: Set hostname from Terraform Node tag (Control Plane only)
+  ansible.builtin.include_tasks: hostname.yml
+  when: role_name == "control-plane"
+  tags:
+    - common
+    - hostname

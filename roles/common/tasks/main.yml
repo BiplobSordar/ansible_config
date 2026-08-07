@@ -12,14 +12,16 @@
     - common
     - facts
 
-- name: Set system hostname
-  ansible.builtin.import_tasks: hostname.yml
+- name: Set hostname from Terraform Node tag (Control Plane only)
+  ansible.builtin.include_tasks: hostname.yml
+  when: role_name == "control-plane"
   tags:
     - common
     - hostname
 
-- name: Include hostname verification
+- name: Include hostname verification (Control Plane only)
   ansible.builtin.include_tasks: verify_hostname.yml
+  when: role_name == "control-plane"
   tags:
     - common
     - verify

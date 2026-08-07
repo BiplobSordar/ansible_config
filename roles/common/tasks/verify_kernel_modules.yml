@@ -40,8 +40,6 @@
 - name: Verify required kernel modules loaded
   ansible.builtin.assert:
     that:
-      - item in loaded_modules.stdout
+      - item in loaded_modules.stdout_lines | map('regex_replace', '\s+.*$', '') | list
     fail_msg: "Kernel module {{ item }} is missing."
-  loop:
-    - overlay
-    - br_netfilter
+  loop: "{{ required_kernel_modules }}"

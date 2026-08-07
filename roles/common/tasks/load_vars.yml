@@ -2,8 +2,7 @@
 
 - name: Load all cluster variables
   ansible.builtin.include_vars:
-    file: "{{ item }}"
-    dir: "{{ playbook_dir }}/../vars"
+    file: "{{ playbook_dir }}/../vars/{{ item }}"
   loop:
     - defaults.yml
     - terraform.yml

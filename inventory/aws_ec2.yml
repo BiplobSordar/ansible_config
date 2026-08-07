@@ -1,73 +1,59 @@
 ---
 plugin: amazon.aws.aws_ec2
 
-
 regions:
-
   - ap-southeast-1
 
-
-
 filters:
-
   instance-state-name: running
-
   tag:Project: "k8s"
-
   tag:Environment: "pr"
 
-
+hostnames:
+  - instance-id
 
 compose:
-
   ansible_host: private_ip_address
 
+  node_name: tags.Node | default("")
+  role_name: tags.Role | default("")
+  cluster_name: tags.Cluster | default("")
 
-  node_name: tags.Node | regex_replace('-','_')
+  instance_id: instance_id
+  instance_name: tags.Name | default("")
+  private_ip: private_ip_address
+  public_ip: public_ip_address | default("")
+  private_dns: private_dns_name | default("")
+  public_dns: public_dns_name | default("")
 
+  availability_zone: placement.availability_zone
+  region: placement.region | default("ap-southeast-1")
 
-  role_name: tags.Role | regex_replace('-','_')
+  vpc_id: vpc_id
+  subnet_id: subnet_id
 
+  image_id: image_id
+  instance_type: instance_type
+  architecture: architecture
 
+  project: tags.Project | default("")
+  environment: tags.Environment | default("")
+  cluster: tags.Cluster | default("")
+  role: tags.Role | default("")
+  bootstrap: tags.Bootstrap | default("false")
+  managed_by: tags.ManagedBy | default("")
+  owner: tags.Owner | default("")
 
-<<<<<<< HEAD
 groups:
   control_plane: tags.Role == "control-plane"
   worker: tags.Role == "worker"
   bootstrap: tags.Bootstrap == "true"
   jenkins: tags.Role == "jenkins"
-  env_pr: tags.Environment == "pr"
-=======
-keyed_groups:
-
-
-  - key: tags.Role
-
-    prefix: raw
-
-    separator: "_"
-
-
-
-  - key: tags.Environment
-
-    prefix: env
-
-    separator: "_"
-
->>>>>>> 7f1709627deb16d4c30f614a1cb820aaa6a2e1e6
-
 
 strict: false
 
-
-
 cache: true
-
 cache_plugin: jsonfile
-
 cache_connection: .ansible_cache/aws_ec2
-
 cache_timeout: 300
-
 cache_prefix: aws_ec2

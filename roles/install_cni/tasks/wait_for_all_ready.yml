@@ -1,33 +1,32 @@
 ---
-# roles/install_cni/tasks/wait_for_all_ready.yml
-
 - name: Wait until every node reports Ready
   ansible.builtin.command:
-    cmd: >
+    cmd: >-
       kubectl
       --kubeconfig={{ admin_kubeconfig_path }}
       get nodes
       --no-headers
   register: nodes
   changed_when: false
-
   retries: "{{ cni_node_ready_wait_retries }}"
   delay: "{{ cni_node_ready_wait_delay }}"
-
-  until: >
+  until: >-
+    nodes.rc == 0 and
+    nodes.stdout_lines | length > 0 and
     (
       nodes.stdout_lines
-      | reject('search',' Ready ')
+      | reject('search', ' NotReady ')
       | list
       | length
-    ) == 0
+    ) == nodes.stdout_lines | length
 
 - name: Show node status
   ansible.builtin.command:
-    cmd: >
+    cmd: >-
       kubectl
       --kubeconfig={{ admin_kubeconfig_path }}
-      get nodes -o wide
+      get nodes
+      -o wide
   register: node_status
   changed_when: false
 

@@ -6,6 +6,7 @@
 kubernetes_version: "1.30.14"
 
 kubernetes_apt_series: "1.30"
+admin_kubeconfig_path: "/etc/kubernetes/admin.conf"
 
 required_kernel_modules:
   - overlay

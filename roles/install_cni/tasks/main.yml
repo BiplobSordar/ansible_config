@@ -1,5 +1,3 @@
----
-
 - name: Verify admin kubeconfig exists
   ansible.builtin.stat:
     path: "{{ admin_kubeconfig_path }}"
@@ -103,6 +101,3 @@
   ansible.builtin.debug:
     var: calico_pods.stdout_lines
 
-- name: Wait until all cluster nodes become Ready
-  ansible.builtin.include_tasks:
-    file: wait_for_all_ready.yml

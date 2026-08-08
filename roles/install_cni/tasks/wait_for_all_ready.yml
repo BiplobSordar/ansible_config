@@ -1,5 +1,3 @@
----
-
 - name: Wait until every cluster node becomes Ready
   ansible.builtin.command:
     cmd: >-

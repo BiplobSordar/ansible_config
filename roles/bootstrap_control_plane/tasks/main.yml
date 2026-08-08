@@ -1,12 +1,3 @@
----
-###############################################################################
-# Bootstrap the First Kubernetes Control Plane
-###############################################################################
-
-################################################################################
-# Safety Check
-################################################################################
-
 - name: Verify exactly one bootstrap node is targeted
   ansible.builtin.assert:
     that:
@@ -14,18 +5,10 @@
     fail_msg: >
       bootstrap_control_plane must run against exactly one host.
 
-################################################################################
-# Determine Bootstrap State
-################################################################################
-
 - name: Check bootstrap marker
   ansible.builtin.stat:
     path: "{{ bootstrap_marker_path }}"
   register: bootstrap_marker
-
-################################################################################
-# Render kubeadm configuration
-################################################################################
 
 - name: Render kubeadm init configuration
   ansible.builtin.template:
@@ -34,10 +17,6 @@
     owner: root
     group: root
     mode: "0600"
-
-################################################################################
-# Bootstrap Cluster
-################################################################################
 
 - name: Initialize Kubernetes control plane
   ansible.builtin.command:
@@ -49,10 +28,6 @@
   when: not bootstrap_marker.stat.exists
   changed_when: true
 
-################################################################################
-# Create Bootstrap Marker
-################################################################################
-
 - name: Create bootstrap marker
   ansible.builtin.copy:
     dest: "{{ bootstrap_marker_path }}"
@@ -61,46 +36,24 @@
     owner: root
     group: root
     mode: "0600"
-  when: not bootstrap_marker.stat.exists
-
-################################################################################
-# Configure kubectl
-################################################################################
+  when:
+    - not bootstrap_marker.stat.exists
+    - kubeadm_init_result is succeeded
 
 - name: Configure kubectl
   ansible.builtin.include_tasks: configure_kubectl.yml
 
-################################################################################
-# Wait for Kubernetes API
-################################################################################
-
 - name: Wait for API server
   ansible.builtin.include_tasks: wait_for_api.yml
-
-################################################################################
-# Generate Join Credentials
-################################################################################
 
 - name: Generate join credentials
   ansible.builtin.include_tasks: generate_join_credentials.yml
 
-################################################################################
-# Store Join Credentials in AWS SSM
-################################################################################
-
 - name: Store join credentials in AWS SSM
   ansible.builtin.include_tasks: store_ssm_parameters.yml
 
-################################################################################
-# Fetch Cluster Artifacts
-################################################################################
-
 - name: Fetch cluster artifacts
   ansible.builtin.include_tasks: fetch_artifacts.yml
-
-################################################################################
-# Report
-################################################################################
 
 - name: Bootstrap completed
   ansible.builtin.debug:

@@ -20,21 +20,8 @@
   register: bootstrap_node
   changed_when: false
   retries: 30
-  delay: 10
+  delay: 5
   until: bootstrap_node.rc == 0
-
-- name: Wait until bootstrap node is Ready
-  ansible.builtin.command:
-    cmd: >-
-      kubectl
-      --kubeconfig={{ admin_kubeconfig_path }}
-      get node {{ node_name | default(inventory_hostname) }}
-      -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
-  register: bootstrap_node_ready
-  changed_when: false
-  retries: 30
-  delay: 10
-  until: bootstrap_node_ready.stdout == "True"
 
 - name: Show bootstrap node status
   ansible.builtin.command:

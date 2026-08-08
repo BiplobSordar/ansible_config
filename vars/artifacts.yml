@@ -9,7 +9,7 @@ local_artifacts_dir: "{{ playbook_dir }}/../.cluster-artifacts/{{ cluster_name }
 # Kubernetes Admin Configuration
 ###############################################################################
 
-admin_kubeconfig_path: "{{ local_artifacts_dir }}/admin.conf"
+local_admin_kubeconfig_path: "{{ local_artifacts_dir }}/admin.conf"
 
 kubeconfig: "{{ admin_kubeconfig_path }}"
 

@@ -1,4 +1,5 @@
 ---
+
 - name: Verify admin kubeconfig exists
   ansible.builtin.stat:
     path: "{{ admin_kubeconfig_path }}"
@@ -9,7 +10,7 @@
     that:
       - admin_conf.stat.exists
       - admin_conf.stat.size | int > 0
-    fail_msg: >-
+    fail_msg: >
       {{ admin_kubeconfig_path }} not found or empty.
       kubeadm init has probably not completed successfully.
 
@@ -42,7 +43,7 @@
     that:
       - calico_manifest.stat.exists
       - calico_manifest.stat.size | int > 0
-    fail_msg: >-
+    fail_msg: >
       Calico manifest was not downloaded correctly:
       {{ cni_manifest_dest }}
 
@@ -93,5 +94,4 @@
     var: calico_pods.stdout_lines
 
 - name: Wait until all cluster nodes become Ready
-  ansible.builtin.include_tasks:
-    file: wait_for_all_ready.yml
+  ansible.builtin.include_tasks: wait_for_all_ready.yml

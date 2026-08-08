@@ -1,21 +1,4 @@
 ---
-###############################################################################
-# Fetch Kubernetes Cluster Artifacts
-#
-# Pull cluster artifacts from the bootstrap control-plane node to the
-# Ansible control node.
-#
-# These artifacts are later consumed by:
-#
-#   • join_control_plane
-#   • join_workers
-#   • kubectl administration
-#
-###############################################################################
-
-################################################################################
-# Ensure Local Artifact Directory Exists
-################################################################################
 
 - name: Ensure local artifacts directory exists
   ansible.builtin.file:
@@ -25,19 +8,11 @@
   delegate_to: localhost
   become: false
 
-################################################################################
-# Fetch admin.conf
-################################################################################
-
 - name: Fetch admin.conf
   ansible.builtin.fetch:
     src: "{{ bootstrap_admin_conf_path }}"
-    dest: "{{ admin_kubeconfig_path }}"
+    dest: "{{ local_admin_kubeconfig_path }}"
     flat: true
-
-################################################################################
-# Fetch worker join command
-################################################################################
 
 - name: Fetch worker join command
   ansible.builtin.fetch:
@@ -45,29 +20,17 @@
     dest: "{{ worker_join_command_path }}"
     flat: true
 
-################################################################################
-# Fetch control-plane join command
-################################################################################
-
 - name: Fetch control-plane join command
   ansible.builtin.fetch:
     src: "{{ bootstrap_control_plane_join_command_path }}"
     dest: "{{ control_plane_join_command_path }}"
     flat: true
 
-################################################################################
-# Fetch certificate key
-################################################################################
-
 - name: Fetch certificate key
   ansible.builtin.fetch:
     src: "{{ bootstrap_certificate_key_path }}"
     dest: "{{ certificate_key_path }}"
     flat: true
-
-################################################################################
-# Secure Local Artifact Directory
-################################################################################
 
 - name: Secure local artifacts directory
   ansible.builtin.file:
@@ -76,10 +39,6 @@
     mode: "0700"
   delegate_to: localhost
   become: false
-
-################################################################################
-# Report
-################################################################################
 
 - name: Report fetched artifacts
   ansible.builtin.debug:

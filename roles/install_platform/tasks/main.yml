@@ -1,73 +1,103 @@
----
-###############################################################################
-# Kubernetes Platform Installation
-###############################################################################
-
 
 - name: Verify Helm installation
-
   ansible.builtin.command:
-
     cmd: helm version
-
-
   register: helm_check
-
-
   changed_when: false
 
-
-
 - name: Fail if Helm is missing
-
   ansible.builtin.assert:
-
     that:
-
       - helm_check.rc == 0
+    fail_msg: "Helm is not installed. Run install_helm role first."
 
-    fail_msg:
+- name: Check Kubernetes admin kubeconfig
+  ansible.builtin.stat:
+    path: /etc/kubernetes/admin.conf
+  register: admin_conf
 
-      - "Helm is not installed."
+- name: Fail if Kubernetes admin kubeconfig is missing
+  ansible.builtin.assert:
+    that:
+      - admin_conf.stat.exists
+      - admin_conf.stat.isreg
+    fail_msg: "Kubernetes admin kubeconfig /etc/kubernetes/admin.conf does not exist."
 
-      - "Run install_helm role first."
+- name: Create user kubeconfig directory
+  ansible.builtin.file:
+    path: /home/ubuntu/.kube
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: "0700"
 
+- name: Install admin kubeconfig for ubuntu
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ platform_kubeconfig }}"
+    remote_src: true
+    owner: ubuntu
+    group: ubuntu
+    mode: "0600"
 
+- name: Verify user kubeconfig
+  ansible.builtin.stat:
+    path: "{{ platform_kubeconfig }}"
+  register: platform_kubeconfig_file
+
+- name: Fail if user kubeconfig is missing
+  ansible.builtin.assert:
+    that:
+      - platform_kubeconfig_file.stat.exists
+      - platform_kubeconfig_file.stat.isreg
+    fail_msg: "Kubeconfig {{ platform_kubeconfig }} does not exist."
+
+- name: Verify Kubernetes API connectivity
+  become_user: ubuntu
+  ansible.builtin.command:
+    cmd: kubectl get nodes
+  environment:
+    KUBECONFIG: "{{ platform_kubeconfig }}"
+    HOME: "/home/ubuntu"
+  register: kubernetes_api_check
+  changed_when: false
+  retries: 12
+  delay: 5
+  until: kubernetes_api_check.rc == 0
+
+- name: Show Kubernetes nodes
+  ansible.builtin.debug:
+    var: kubernetes_api_check.stdout_lines
+
+- name: Verify Helm Kubernetes connectivity
+  become_user: ubuntu
+  ansible.builtin.command:
+    cmd: helm list --all-namespaces
+  environment:
+    KUBECONFIG: "{{ platform_kubeconfig }}"
+    HOME: "/home/ubuntu"
+  register: helm_api_check
+  changed_when: false
+  retries: 12
+  delay: 5
+  until: helm_api_check.rc == 0
 
 - name: Create platform values directory
-
   ansible.builtin.file:
-
     path: "{{ platform_values_dir }}"
-
     state: directory
-
     owner: root
-
     group: root
-
     mode: "0755"
 
-
-
 - name: Configure Helm repositories
-
   ansible.builtin.include_tasks:
-
     file: repositories.yml
 
-
-
 - name: Generate Helm values files
-
   ansible.builtin.include_tasks:
-
     file: values.yml
 
-
-
 - name: Deploy Kubernetes platform charts
-
   ansible.builtin.include_tasks:
-
     file: charts.yml

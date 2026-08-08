@@ -1,193 +1,97 @@
----
-###############################################################################
-# Deploy Kubernetes Platform Helm Charts
-#
-# Installed components:
-#
-#   1. Ingress NGINX
-#   2. Metrics Server
-#   3. cert-manager
-#   4. AWS EBS CSI Driver
-#   5. Cluster Autoscaler
-#   6. Argo CD
-#
-###############################################################################
 
-
-###############################################################################
-# Ingress NGINX
-###############################################################################
 
 - name: Install Ingress NGINX
-
+  become_user: ubuntu
   kubernetes.core.helm:
-
     kubeconfig: "{{ platform_kubeconfig }}"
-
     name: "{{ helm_charts.ingress_nginx.release }}"
-
     chart_ref: "{{ helm_charts.ingress_nginx.chart }}"
-
     chart_version: "{{ helm_charts.ingress_nginx.version }}"
-
     release_namespace: "{{ helm_charts.ingress_nginx.namespace }}"
-
     create_namespace: true
-
     values_files:
-
       - "{{ platform_values_dir }}/ingress-nginx.yaml"
-
     wait: true
-
     atomic: true
-
-
-
-###############################################################################
-# Metrics Server
-###############################################################################
+  environment:
+    HOME: "/home/ubuntu"
 
 - name: Install Metrics Server
-
+  become_user: ubuntu
   kubernetes.core.helm:
-
     kubeconfig: "{{ platform_kubeconfig }}"
-
     name: "{{ helm_charts.metrics_server.release }}"
-
     chart_ref: "{{ helm_charts.metrics_server.chart }}"
-
     chart_version: "{{ helm_charts.metrics_server.version }}"
-
     release_namespace: "{{ helm_charts.metrics_server.namespace }}"
-
     create_namespace: true
-
     values_files:
-
       - "{{ platform_values_dir }}/metrics-server.yaml"
-
     wait: true
-
     atomic: true
-
-
-
-###############################################################################
-# cert-manager
-###############################################################################
+  environment:
+    HOME: "/home/ubuntu"
 
 - name: Install cert-manager
-
+  become_user: ubuntu
   kubernetes.core.helm:
-
     kubeconfig: "{{ platform_kubeconfig }}"
-
     name: "{{ helm_charts.cert_manager.release }}"
-
     chart_ref: "{{ helm_charts.cert_manager.chart }}"
-
     chart_version: "{{ helm_charts.cert_manager.version }}"
-
     release_namespace: "{{ helm_charts.cert_manager.namespace }}"
-
     create_namespace: true
-
     values_files:
-
       - "{{ platform_values_dir }}/cert-manager.yaml"
-
     wait: true
-
     atomic: true
-
-
-
-###############################################################################
-# AWS EBS CSI Driver
-###############################################################################
+  environment:
+    HOME: "/home/ubuntu"
 
 - name: Install AWS EBS CSI Driver
-
+  become_user: ubuntu
   kubernetes.core.helm:
-
     kubeconfig: "{{ platform_kubeconfig }}"
-
     name: "{{ helm_charts.aws_ebs_csi.release }}"
-
     chart_ref: "{{ helm_charts.aws_ebs_csi.chart }}"
-
     chart_version: "{{ helm_charts.aws_ebs_csi.version }}"
-
     release_namespace: "{{ helm_charts.aws_ebs_csi.namespace }}"
-
     create_namespace: true
-
     values_files:
-
       - "{{ platform_values_dir }}/aws-ebs-csi.yaml"
-
     wait: true
-
     atomic: true
-
-
-
-###############################################################################
-# Cluster Autoscaler
-###############################################################################
+  environment:
+    HOME: "/home/ubuntu"
 
 - name: Install Cluster Autoscaler
-
+  become_user: ubuntu
   kubernetes.core.helm:
-
     kubeconfig: "{{ platform_kubeconfig }}"
-
     name: "{{ helm_charts.cluster_autoscaler.release }}"
-
     chart_ref: "{{ helm_charts.cluster_autoscaler.chart }}"
-
     chart_version: "{{ helm_charts.cluster_autoscaler.version }}"
-
     release_namespace: "{{ helm_charts.cluster_autoscaler.namespace }}"
-
     create_namespace: true
-
     values_files:
-
       - "{{ platform_values_dir }}/cluster-autoscaler.yaml"
-
     wait: true
-
     atomic: true
-
-
-
-###############################################################################
-# Argo CD
-###############################################################################
+  environment:
+    HOME: "/home/ubuntu"
 
 - name: Install Argo CD
-
+  become_user: ubuntu
   kubernetes.core.helm:
-
     kubeconfig: "{{ platform_kubeconfig }}"
-
     name: "{{ helm_charts.argocd.release }}"
-
     chart_ref: "{{ helm_charts.argocd.chart }}"
-
     chart_version: "{{ helm_charts.argocd.version }}"
-
     release_namespace: "{{ helm_charts.argocd.namespace }}"
-
     create_namespace: true
-
     values_files:
-
       - "{{ platform_values_dir }}/argocd.yaml"
-
     wait: true
-
     atomic: true
+  environment:
+    HOME: "/home/ubuntu"

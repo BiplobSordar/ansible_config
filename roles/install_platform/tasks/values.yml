@@ -1,99 +1,49 @@
----
-###############################################################################
-# Render Helm Values Files
-###############################################################################
 
 
 - name: Render ingress nginx values
-
   ansible.builtin.template:
-
     src: ingress-nginx.yaml.j2
-
     dest: "{{ platform_values_dir }}/ingress-nginx.yaml"
-
     owner: root
-
     group: root
-
     mode: "0644"
-
-
 
 - name: Render metrics server values
-
   ansible.builtin.template:
-
     src: metrics-server.yaml.j2
-
     dest: "{{ platform_values_dir }}/metrics-server.yaml"
-
     owner: root
-
     group: root
-
     mode: "0644"
-
-
 
 - name: Render cert manager values
-
   ansible.builtin.template:
-
     src: cert-manager.yaml.j2
-
     dest: "{{ platform_values_dir }}/cert-manager.yaml"
-
     owner: root
-
     group: root
-
     mode: "0644"
-
-
 
 - name: Render AWS EBS CSI values
-
   ansible.builtin.template:
-
     src: aws-ebs-csi.yaml.j2
-
     dest: "{{ platform_values_dir }}/aws-ebs-csi.yaml"
-
     owner: root
-
     group: root
-
     mode: "0644"
-
-
 
 - name: Render cluster autoscaler values
-
   ansible.builtin.template:
-
     src: cluster-autoscaler.yaml.j2
-
     dest: "{{ platform_values_dir }}/cluster-autoscaler.yaml"
-
     owner: root
-
     group: root
-
     mode: "0644"
 
-
-
 - name: Render Argo CD values
-
   ansible.builtin.template:
-
     src: argocd.yaml.j2
-
     dest: "{{ platform_values_dir }}/argocd.yaml"
-
     owner: root
-
     group: root
-
     mode: "0644"

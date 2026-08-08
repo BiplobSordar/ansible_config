@@ -1,21 +1,32 @@
----
-###############################################################################
-# Add Helm Chart Repositories
-###############################################################################
 
 
 - name: Add Kubernetes platform Helm repositories
-
   kubernetes.core.helm_repository:
-
     name: "{{ item.value.name }}"
-
     repo_url: "{{ item.value.url }}"
-
-
+    state: present
   loop: "{{ helm_repositories | dict2items }}"
-
-
   loop_control:
-
     label: "{{ item.value.name }}"
+
+- name: Update Helm repositories
+  become_user: ubuntu
+  ansible.builtin.command:
+    cmd: helm repo update
+  environment:
+    HOME: "/home/ubuntu"
+  register: helm_repo_update
+  changed_when: true
+
+- name: Verify Helm repositories
+  become_user: ubuntu
+  ansible.builtin.command:
+    cmd: helm repo list
+  environment:
+    HOME: "/home/ubuntu"
+  register: helm_repo_list
+  changed_when: false
+
+- name: Show Helm repositories
+  ansible.builtin.debug:
+    var: helm_repo_list.stdout_lines

@@ -1,5 +1,16 @@
 ---
-# roles/install_cni/defaults/main.yml
-cni_manifest_dest: /etc/kubernetes/calico.yaml
+
+admin_kubeconfig_path: "/etc/kubernetes/admin.conf"
+
+calico_manifest_url: "https://raw.githubusercontent.com/projectcalico/calico/v3.30.3/manifests/calico.yaml"
+
+cni_manifest_dest: "/etc/kubernetes/calico.yaml"
+
+cni_api_wait_retries: 30
+cni_api_wait_delay: 10
+
+cni_daemonset_wait_retries: 30
+cni_daemonset_wait_delay: 10
+
 cni_node_ready_wait_retries: 30
 cni_node_ready_wait_delay: 10

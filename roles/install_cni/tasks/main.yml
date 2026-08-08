@@ -1,4 +1,5 @@
 ---
+
 - name: Verify admin kubeconfig exists
   ansible.builtin.stat:
     path: "{{ admin_kubeconfig_path }}"
@@ -22,8 +23,8 @@
       cluster-info
   register: api_server
   changed_when: false
-  retries: 30
-  delay: 10
+  retries: "{{ cni_api_wait_retries }}"
+  delay: "{{ cni_api_wait_delay }}"
   until: api_server.rc == 0
 
 - name: Download Calico manifest
@@ -48,11 +49,18 @@
       Calico manifest was not downloaded correctly:
       {{ cni_manifest_dest }}
 
-- name: Install Calico
-  kubernetes.core.k8s:
-    kubeconfig: "{{ admin_kubeconfig_path }}"
-    state: present
-    src: "{{ cni_manifest_dest }}"
+- name: Apply Calico manifest
+  ansible.builtin.command:
+    cmd: >-
+      kubectl
+      --kubeconfig={{ admin_kubeconfig_path }}
+      apply
+      -f
+      {{ cni_manifest_dest }}
+  register: calico_apply
+  changed_when: >
+    'created' in calico_apply.stdout or
+    'configured' in calico_apply.stdout
 
 - name: Wait for Calico DaemonSet to be created
   ansible.builtin.command:
@@ -63,8 +71,8 @@
       -n kube-system
   register: calico_daemonset
   changed_when: false
-  retries: 30
-  delay: 10
+  retries: "{{ cni_daemonset_wait_retries }}"
+  delay: "{{ cni_daemonset_wait_delay }}"
   until: calico_daemonset.rc == 0
 
 - name: Wait until Calico DaemonSet rollout completes
@@ -72,7 +80,8 @@
     cmd: >-
       kubectl
       --kubeconfig={{ admin_kubeconfig_path }}
-      rollout status daemonset/calico-node
+      rollout status
+      daemonset/calico-node
       -n kube-system
       --timeout=300s
   register: calico_rollout
@@ -95,4 +104,5 @@
     var: calico_pods.stdout_lines
 
 - name: Wait until all cluster nodes become Ready
-  ansible.builtin.include_tasks: wait_for_all_ready.yml
+  ansible.builtin.include_tasks:
+    file: wait_for_all_ready.yml

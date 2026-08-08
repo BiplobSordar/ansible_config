@@ -6,14 +6,14 @@
   any_errors_fatal: true
 
   vars_files:
-    - vars/defaults.yml
-    - vars/terraform.yml
-    - vars/kubernetes.yml
-    - vars/containerd.yml
-    - vars/calico.yml
-    - vars/helm.yml
-    - vars/validation.yml
-    - vars/artifacts.yml
+    - "{{ playbook_dir }}/../vars/defaults.yml"
+    - "{{ playbook_dir }}/../vars/terraform.yml"
+    - "{{ playbook_dir }}/../vars/kubernetes.yml"
+    - "{{ playbook_dir }}/../vars/containerd.yml"
+    - "{{ playbook_dir }}/../vars/calico.yml"
+    - "{{ playbook_dir }}/../vars/helm.yml"
+    - "{{ playbook_dir }}/../vars/validation.yml"
+    - "{{ playbook_dir }}/../vars/artifacts.yml"
 
   roles:
     - role: install_cni

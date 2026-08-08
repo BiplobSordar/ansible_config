@@ -1,5 +1,4 @@
 ---
-
 - name: Wait until every node reports Ready
   ansible.builtin.command:
     cmd: >-
@@ -12,12 +11,10 @@
   retries: "{{ cni_node_ready_wait_retries }}"
   delay: "{{ cni_node_ready_wait_delay }}"
   until: >
-    (
-      nodes.stdout_lines
-      | reject('search', ' Ready ')
-      | list
-      | length
-    ) == 0
+    nodes.stdout_lines
+    | reject('search', ' Ready ')
+    | list
+    | length == 0
 
 - name: Show node status
   ansible.builtin.command:

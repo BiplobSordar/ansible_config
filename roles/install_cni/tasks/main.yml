@@ -1,5 +1,4 @@
 ---
-
 - name: Verify admin kubeconfig exists
   ansible.builtin.stat:
     path: "{{ admin_kubeconfig_path }}"
@@ -9,8 +8,9 @@
   ansible.builtin.assert:
     that:
       - admin_conf.stat.exists
+      - admin_conf.stat.isreg
       - admin_conf.stat.size | int > 0
-    fail_msg: >
+    fail_msg: >-
       {{ admin_kubeconfig_path }} not found or empty.
       kubeadm init has probably not completed successfully.
 
@@ -42,8 +42,9 @@
   ansible.builtin.assert:
     that:
       - calico_manifest.stat.exists
+      - calico_manifest.stat.isreg
       - calico_manifest.stat.size | int > 0
-    fail_msg: >
+    fail_msg: >-
       Calico manifest was not downloaded correctly:
       {{ cni_manifest_dest }}
 

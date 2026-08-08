@@ -1,15 +1,20 @@
-
+---
 
 - name: Add Kubernetes platform Helm repositories
+  become: true
+  become_user: ubuntu
   kubernetes.core.helm_repository:
     name: "{{ item.value.name }}"
     repo_url: "{{ item.value.url }}"
     state: present
+  environment:
+    HOME: "/home/ubuntu"
   loop: "{{ helm_repositories | dict2items }}"
   loop_control:
     label: "{{ item.value.name }}"
 
 - name: Update Helm repositories
+  become: true
   become_user: ubuntu
   ansible.builtin.command:
     cmd: helm repo update
@@ -19,6 +24,7 @@
   changed_when: true
 
 - name: Verify Helm repositories
+  become: true
   become_user: ubuntu
   ansible.builtin.command:
     cmd: helm repo list

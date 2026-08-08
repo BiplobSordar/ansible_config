@@ -1,7 +1,11 @@
 
 - name: Verify Helm installation
+  become: true
+  become_user: ubuntu
   ansible.builtin.command:
     cmd: helm version
+  environment:
+    HOME: "/home/ubuntu"
   register: helm_check
   changed_when: false
 
@@ -53,6 +57,7 @@
     fail_msg: "Kubeconfig {{ platform_kubeconfig }} does not exist."
 
 - name: Verify Kubernetes API connectivity
+  become: true
   become_user: ubuntu
   ansible.builtin.command:
     cmd: kubectl get nodes
@@ -70,6 +75,7 @@
     var: kubernetes_api_check.stdout_lines
 
 - name: Verify Helm Kubernetes connectivity
+  become: true
   become_user: ubuntu
   ansible.builtin.command:
     cmd: helm list --all-namespaces

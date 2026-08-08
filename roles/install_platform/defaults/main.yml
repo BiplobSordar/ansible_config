@@ -1,33 +1,5 @@
-
-
 platform_kubeconfig: "/home/ubuntu/.kube/config"
 
 platform_values_dir: "/etc/kubernetes/platform-values"
 
 install_platform_components: true
-
-helm_repositories:
-
-  ingress_nginx:
-    name: ingress-nginx
-    url: https://kubernetes.github.io/ingress-nginx
-
-  metrics_server:
-    name: metrics-server
-    url: https://kubernetes-sigs.github.io/metrics-server/
-
-  cert_manager:
-    name: jetstack
-    url: https://charts.jetstack.io
-
-  aws_ebs_csi:
-    name: aws-ebs-csi-driver
-    url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
-
-  cluster_autoscaler:
-    name: autoscaler
-    url: https://kubernetes.github.io/autoscaler
-
-  argocd:
-    name: argo
-    url: https://argoproj.github.io/argo-helm

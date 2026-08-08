@@ -1,4 +1,4 @@
-
+---
 
 - name: Render ingress nginx values
   ansible.builtin.template:

@@ -1,10 +1,10 @@
 ---
 
-admin_kubeconfig_path: "/etc/kubernetes/admin.conf"
+cni_manifest_dest: /etc/kubernetes/calico.yaml
+
+admin_kubeconfig_path: /etc/kubernetes/admin.conf
 
 calico_manifest_url: "https://raw.githubusercontent.com/projectcalico/calico/v3.30.3/manifests/calico.yaml"
-
-cni_manifest_dest: "/etc/kubernetes/calico.yaml"
 
 cni_api_wait_retries: 30
 cni_api_wait_delay: 10

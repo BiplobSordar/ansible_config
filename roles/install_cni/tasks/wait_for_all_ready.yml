@@ -1,20 +1,17 @@
 ---
-- name: Wait until every node reports Ready
+
+- name: Wait until every cluster node becomes Ready
   ansible.builtin.command:
     cmd: >-
       kubectl
       --kubeconfig={{ admin_kubeconfig_path }}
-      get nodes
-      --no-headers
-  register: nodes
+      wait
+      --for=condition=Ready
+      nodes
+      --all
+      --timeout=300s
+  register: nodes_ready
   changed_when: false
-  retries: "{{ cni_node_ready_wait_retries }}"
-  delay: "{{ cni_node_ready_wait_delay }}"
-  until: >
-    nodes.stdout_lines
-    | reject('search', ' Ready ')
-    | list
-    | length == 0
 
 - name: Show node status
   ansible.builtin.command:

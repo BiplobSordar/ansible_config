@@ -18,7 +18,7 @@ wait_for_node_ready_timeout: 600
 wait_for_pod_ready_timeout: 600
 
 wait_for_api_timeout: 600
-
+admin_kubeconfig_path: "/etc/kubernetes/admin.conf"
 
 ###############################################################################
 # Rolling Join Configuration

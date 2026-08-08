@@ -1,3 +1,4 @@
+
 - name: Verify exactly one bootstrap node is targeted
   ansible.builtin.assert:
     that:
@@ -16,7 +17,7 @@
     state: directory
     owner: root
     group: root
-    mode: "0755"  
+    mode: "0755"
 
 - name: Render kubeadm init configuration
   ansible.builtin.template:
@@ -28,7 +29,7 @@
 
 - name: Initialize Kubernetes control plane
   ansible.builtin.command:
-    cmd: >
+    cmd: >-
       kubeadm init
       --config {{ bootstrap_kubeadm_config_path }}
       {{ '--upload-certs' if bootstrap_upload_certs else '' }}
@@ -69,3 +70,4 @@
       - "Bootstrap control plane completed successfully."
       - "Cluster: {{ cluster_name }}"
       - "Node: {{ inventory_hostname }}"
+

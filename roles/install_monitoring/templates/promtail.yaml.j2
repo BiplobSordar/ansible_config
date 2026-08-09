@@ -1,8 +1,4 @@
 config:
-  logLevel: info
-  logFormat: logfmt
-  serverPort: 3101
-
   clients:
     - url: http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push
 
@@ -17,6 +13,7 @@ config:
           - role: pod
 
         relabel_configs:
+
           - source_labels:
               - __meta_kubernetes_namespace
             target_label: namespace

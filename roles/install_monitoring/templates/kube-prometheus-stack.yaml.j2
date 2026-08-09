@@ -9,15 +9,24 @@ grafana:
     enabled: true
     size: 10Gi
 
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    path: /grafana
+    pathType: Prefix
+
+  grafana.ini:
+    server:
+      root_url: "%(protocol)s://%(domain)s/grafana/"
+      serve_from_sub_path: true
+
 prometheus:
   prometheusSpec:
     retention: 15d
-
     resources:
       requests:
         cpu: 500m
         memory: 1Gi
-
       limits:
         cpu: 1000m
         memory: 2Gi

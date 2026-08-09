@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K8s Infrastructure Ansible — Project Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:            #0a0d12;
+    --panel:         #10141c;
+    --panel-2:       #141924;
+    --line:          #232a38;
+    --line-soft:     #1a2029;
+    --text:          #e7eaf0;
+    --text-dim:      #8994a6;
+    --text-faint:    #5c6577;
+    --cyan:          #4fd1c5;
+    --cyan-dim:      #2a5c58;
+    --amber:         #f0b429;
+    --green:         #3fb950;
+    --violet:        #a78bfa;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'IBM Plex Sans', -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size:64px 64px;
+    opacity:.35;
+    pointer-events:none;
+    z-index:0;
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:0 28px; position:relative; z-index:1;}
+  a{color:var(--cyan); text-decoration:none;}
+
+  /* ---------- status bar ---------- */
+  .statusbar{
+    border-bottom:1px solid var(--line);
+    background:rgba(10,13,18,.9);
+    backdrop-filter:blur(6px);
+    position:sticky; top:0; z-index:10;
+  }
+  .statusbar-inner{
+    max-width:980px; margin:0 auto; padding:12px 28px;
+    display:flex; align-items:center; justify-content:space-between;
+    font-family:var(--mono); font-size:12px; color:var(--text-faint);
+    letter-spacing:.02em;
+  }
+  .statusbar .dot{width:7px; height:7px; border-radius:50%; background:var(--green); display:inline-block; margin-right:8px; box-shadow:0 0 8px var(--green);}
+  .statusbar-right{display:flex; gap:22px;}
+  .statusbar-right span{color:var(--text-dim);}
+  @media (max-width:640px){ .statusbar-right{display:none;} }
+
+  /* ---------- hero ---------- */
+  .hero{padding:88px 0 64px; position:relative;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12.5px; color:var(--cyan);
+    letter-spacing:.14em; text-transform:uppercase;
+    display:flex; align-items:center; gap:10px; margin-bottom:22px;
+  }
+  .eyebrow::before{content:"▸"; color:var(--cyan);}
+  h1{
+    font-family:var(--mono); font-weight:700;
+    font-size:clamp(30px, 5vw, 46px);
+    line-height:1.15; letter-spacing:-.01em;
+    color:#fff; max-width:820px;
+  }
+  h1 .accent{color:var(--cyan);}
+  .lede{
+    margin-top:22px; font-size:17px; color:var(--text-dim);
+    max-width:640px; line-height:1.7;
+  }
+  .lede b{color:var(--text); font-weight:600;}
+  .badges{display:flex; flex-wrap:wrap; gap:8px; margin-top:30px;}
+  .badge{
+    font-family:var(--mono); font-size:11.5px; color:var(--text-dim);
+    border:1px solid var(--line); background:var(--panel);
+    padding:6px 11px; border-radius:4px; letter-spacing:.02em;
+  }
+
+  /* ---------- separation strip ---------- */
+  .divider{
+    display:flex; align-items:center; gap:14px; margin:0 0 0 0;
+    padding:20px 0; color:var(--text-faint); font-family:var(--mono); font-size:11px;
+  }
+  .divider .line{flex:1; height:1px; background:var(--line);}
+
+  /* ---------- section shell ---------- */
+  section{padding:56px 0;}
+  section.tight{padding:40px 0;}
+  .section-head{margin-bottom:34px;}
+  .num{
+    font-family:var(--mono); font-size:12px; color:var(--cyan-dim);
+    letter-spacing:.1em;
+  }
+  h2{
+    font-family:var(--mono); font-size:24px; color:#fff; margin-top:6px;
+    letter-spacing:-.01em;
+  }
+  .section-desc{color:var(--text-dim); margin-top:10px; max-width:640px; font-size:15px;}
+
+  /* ---------- ownership split ---------- */
+  .split{
+    display:grid; grid-template-columns:1fr 1fr; gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:8px; overflow:hidden;
+  }
+  @media (max-width:680px){ .split{grid-template-columns:1fr;} }
+  .split-col{background:var(--panel); padding:26px;}
+  .split-col h3{
+    font-family:var(--mono); font-size:13px; letter-spacing:.06em; text-transform:uppercase;
+    margin-bottom:16px; display:flex; align-items:center; gap:8px;
+  }
+  .split-col.tf h3{color:var(--violet);}
+  .split-col.an h3{color:var(--cyan);}
+  .split-col ul{list-style:none;}
+  .split-col li{
+    font-size:13.5px; color:var(--text-dim); padding:6px 0 6px 18px; position:relative;
+  }
+  .split-col.tf li::before{content:"–"; position:absolute; left:0; color:var(--violet);}
+  .split-col.an li::before{content:"–"; position:absolute; left:0; color:var(--cyan);}
+
+  /* ---------- pipeline ---------- */
+  .pipeline{
+    display:flex; overflow-x:auto; gap:0; padding-bottom:10px; margin:0 -4px;
+    scrollbar-width:thin;
+  }
+  .stage{
+    flex:0 0 auto; width:168px; padding:16px 14px; margin:0 4px;
+    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    position:relative;
+  }
+  .stage::after{
+    content:"→"; position:absolute; right:-17px; top:50%; transform:translateY(-50%);
+    color:var(--text-faint); font-family:var(--mono); font-size:14px;
+  }
+  .stage:last-child::after{content:"";}
+  .stage .step-no{font-family:var(--mono); font-size:10.5px; color:var(--cyan); letter-spacing:.08em;}
+  .stage .step-name{font-family:var(--mono); font-size:13px; color:var(--text); margin-top:6px; font-weight:600;}
+  .stage .step-sub{font-size:11.5px; color:var(--text-faint); margin-top:4px; line-height:1.4;}
+  .stage.hl{border-color:var(--cyan-dim); box-shadow:0 0 0 1px var(--cyan-dim) inset;}
+
+  /* ---------- responsibilities grid ---------- */
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:8px; overflow:hidden;}
+  @media (max-width:760px){ .grid3{grid-template-columns:1fr 1fr;} }
+  @media (max-width:520px){ .grid3{grid-template-columns:1fr;} }
+  .cell{background:var(--panel); padding:20px; min-height:96px;}
+  .cell .tag{font-family:var(--mono); font-size:10.5px; color:var(--text-faint); letter-spacing:.08em; text-transform:uppercase;}
+  .cell .title{font-size:14.5px; font-weight:600; margin-top:8px; color:var(--text);}
+  .cell .desc{font-size:12.5px; color:var(--text-dim); margin-top:5px; line-height:1.5;}
+
+  /* ---------- file tree ---------- */
+  .filetree{
+    font-family:var(--mono); font-size:12.5px; color:var(--text-dim);
+    background:var(--panel); border:1px solid var(--line); border-radius:8px;
+    padding:22px 24px; overflow-x:auto; line-height:1.85; white-space:pre;
+  }
+  .filetree .dir{color:var(--cyan);}
+  .filetree .yml{color:var(--amber);}
+  .filetree .comment{color:var(--text-faint);}
+
+  /* ---------- platform / monitoring chips ---------- */
+  .chiprow{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;}
+  .chip{
+    font-family:var(--mono); font-size:12px; padding:7px 12px; border-radius:20px;
+    border:1px solid var(--line); color:var(--text-dim); background:var(--panel-2);
+  }
+  .chip.platform{border-color:#2a4a52;}
+  .chip.mon{border-color:#3a3320;}
+
+  /* ---------- terminal ---------- */
+  .terminal{
+    background:#080a0e; border:1px solid var(--line); border-radius:8px; overflow:hidden;
+    box-shadow:0 20px 60px -20px rgba(0,0,0,.6);
+  }
+  .term-bar{
+    display:flex; align-items:center; gap:8px; padding:10px 14px; background:var(--panel-2);
+    border-bottom:1px solid var(--line);
+  }
+  .term-bar .tdot{width:10px; height:10px; border-radius:50%;}
+  .term-bar .tdot:nth-child(1){background:#ff5f56;}
+  .term-bar .tdot:nth-child(2){background:#ffbd2e;}
+  .term-bar .tdot:nth-child(3){background:#27c93f;}
+  .term-bar .path{margin-left:10px; font-family:var(--mono); font-size:11.5px; color:var(--text-faint);}
+  .term-body{padding:20px 22px; font-family:var(--mono); font-size:12.5px; line-height:1.9;}
+  .term-body .prompt{color:var(--cyan);}
+  .term-body .cmd{color:var(--text);}
+  .term-body .ok{color:var(--green);}
+  .term-line{display:flex; justify-content:space-between; color:var(--text-dim);}
+  .term-line .val{color:var(--green); font-weight:600;}
+
+  /* ---------- validation checklist ---------- */
+  .checklist{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:18px;}
+  @media (max-width:600px){ .checklist{grid-template-columns:1fr;} }
+  .check-item{
+    display:flex; align-items:flex-start; gap:10px; padding:14px 16px;
+    background:var(--panel); border:1px solid var(--line); border-radius:6px; font-size:13px;
+  }
+  .check-item .mark{color:var(--green); font-family:var(--mono); font-weight:700;}
+  .check-item .lbl{color:var(--text);}
+  .check-item .sub{display:block; color:var(--text-faint); font-size:11.5px; margin-top:2px;}
+
+  /* ---------- principles ---------- */
+  .principles{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:8px;}
+  @media (max-width:820px){ .principles{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:480px){ .principles{grid-template-columns:1fr;} }
+  .principle{padding:18px; border:1px solid var(--line); border-radius:8px; background:var(--panel);}
+  .principle .p-num{font-family:var(--mono); font-size:11px; color:var(--cyan);}
+  .principle .p-title{font-size:14px; font-weight:600; margin-top:8px;}
+  .principle .p-desc{font-size:12px; color:var(--text-dim); margin-top:6px; line-height:1.5;}
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:1px solid var(--line); padding:40px 0 60px; margin-top:20px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;
+  }
+  footer .fmono{font-family:var(--mono); font-size:12px; color:var(--text-faint);}
+  footer .fmono .ok{color:var(--green);}
+
+  ::-webkit-scrollbar{height:6px; width:6px;}
+  ::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="statusbar">
+  <div class="statusbar-inner">
+    <div><span class="dot"></span>CLUSTER VALIDATION PASSED</div>
+    <div class="statusbar-right">
+      <span>nodes: <b style="color:var(--text)">ready</b></span>
+      <span>etcd: <b style="color:var(--text)">healthy</b></span>
+      <span>coredns: <b style="color:var(--text)">healthy</b></span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow">infrastructure automation · aws · kubernetes</div>
+    <h1>Production-grade Ansible automation<br>for a highly available <span class="accent">Kubernetes</span> cluster on AWS.</h1>
+    <p class="lede">
+      This project takes raw EC2 infrastructure and turns it into a fully operational, monitored,
+      GitOps-ready Kubernetes platform — <b>provisioning, joining, networking, and validating</b> a
+      3-node control plane and dynamically scaled worker fleet, end to end.
+    </p>
+    <div class="badges">
+      <span class="badge">Ansible</span>
+      <span class="badge">Terraform</span>
+      <span class="badge">AWS EC2</span>
+      <span class="badge">Kubernetes / kubeadm</span>
+      <span class="badge">Calico CNI</span>
+      <span class="badge">Helm</span>
+      <span class="badge">Argo CD</span>
+      <span class="badge">Prometheus / Grafana / Loki</span>
+    </div>
+  </section>
+
+  <div class="divider"><span>01 / OWNERSHIP</span><div class="line"></div></div>
+
+  <section class="tight">
+    <div class="section-head">
+      <div class="num">SEPARATION OF CONCERNS</div>
+      <h2>Two systems, one clean boundary</h2>
+      <p class="section-desc">Infrastructure and configuration are deliberately decoupled — a pattern that keeps environments reproducible and prevents drift.</p>
+    </div>
+    <div class="split">
+      <div class="split-col tf">
+        <h3>▲ Terraform — infrastructure</h3>
+        <ul>
+          <li>VPC &amp; subnets</li>
+          <li>Security groups</li>
+          <li>EC2 instances</li>
+          <li>Load balancers &amp; NAT gateways</li>
+          <li>IAM &amp; RDS</li>
+        </ul>
+      </div>
+      <div class="split-col an">
+        <h3>⎈ Ansible — configuration (this repo)</h3>
+        <ul>
+          <li>OS &amp; runtime prep (containerd)</li>
+          <li>kubeadm init / join</li>
+          <li>Calico networking + Helm</li>
+          <li>Platform &amp; monitoring stack</li>
+          <li>Automated cluster validation</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><span>02 / PIPELINE</span><div class="line"></div></div>
+
+  <section class="tight">
+    <div class="section-head">
+      <div class="num">EXECUTION FLOW</div>
+      <h2>11 ordered playbooks, one command</h2>
+      <p class="section-desc">Every stage is independently runnable and idempotent — safe to re-run without disrupting a healthy cluster.</p>
+    </div>
+    <div class="pipeline">
+      <div class="stage"><div class="step-no">01</div><div class="step-name">Common</div><div class="step-sub">OS prep, sysctl, kernel modules</div></div>
+      <div class="stage"><div class="step-no">02</div><div class="step-name">containerd</div><div class="step-sub">CRI runtime + crictl</div></div>
+      <div class="stage"><div class="step-no">03</div><div class="step-name">Kubernetes</div><div class="step-sub">kubeadm / kubelet / kubectl</div></div>
+      <div class="stage hl"><div class="step-no">04</div><div class="step-name">Bootstrap CP</div><div class="step-sub">kubeadm init, node 1</div></div>
+      <div class="stage hl"><div class="step-no">05</div><div class="step-name">Join CP ×2</div><div class="step-sub">HA control plane + etcd</div></div>
+      <div class="stage"><div class="step-no">06</div><div class="step-name">Calico CNI</div><div class="step-sub">pod networking</div></div>
+      <div class="stage"><div class="step-no">07</div><div class="step-name">Join Workers</div><div class="step-sub">dynamic, ASG-aware</div></div>
+      <div class="stage"><div class="step-no">08</div><div class="step-name">Helm</div><div class="step-sub">chart package manager</div></div>
+      <div class="stage"><div class="step-no">09</div><div class="step-name">Platform</div><div class="step-sub">ingress, TLS, autoscaling</div></div>
+      <div class="stage"><div class="step-no">10</div><div class="step-name">Validation</div><div class="step-sub">health checks, all layers</div></div>
+      <div class="stage"><div class="step-no">11</div><div class="step-name">Monitoring</div><div class="step-sub">Prometheus / Grafana / Loki</div></div>
+    </div>
+  </section>
+
+  <div class="divider"><span>03 / RESPONSIBILITIES</span><div class="line"></div></div>
+
+  <section class="tight">
+    <div class="section-head">
+      <div class="num">WHAT THE AUTOMATION HANDLES</div>
+      <h2>Every layer between bare EC2 and a ready platform</h2>
+    </div>
+    <div class="grid3">
+      <div class="cell"><div class="tag">Provisioning</div><div class="title">Host preparation</div><div class="desc">Hostname, swap, kernel modules, sysctl, time sync across every node.</div></div>
+      <div class="cell"><div class="tag">Runtime</div><div class="title">Container runtime</div><div class="desc">containerd install, CRI wiring, crictl configuration.</div></div>
+      <div class="cell"><div class="tag">Cluster</div><div class="title">Control plane HA</div><div class="desc">kubeadm init + join for a 3-node etcd-backed control plane.</div></div>
+      <div class="cell"><div class="tag">Networking</div><div class="title">Calico CNI</div><div class="desc">Pod networking installed and confirmed converged before proceeding.</div></div>
+      <div class="cell"><div class="tag">Scaling</div><div class="title">Dynamic workers</div><div class="desc">Worker join designed for AWS Auto Scaling Group churn.</div></div>
+      <div class="cell"><div class="tag">Delivery</div><div class="title">Platform + GitOps</div><div class="desc">Ingress, cert-manager, autoscaler, EBS CSI, Argo CD via Helm.</div></div>
+      <div class="cell"><div class="tag">Observability</div><div class="title">Monitoring stack</div><div class="desc">Prometheus, Grafana, Loki, Promtail deployed and health-checked.</div></div>
+      <div class="cell"><div class="tag">Integration</div><div class="title">Terraform bridge</div><div class="desc">Python script converts Terraform outputs into Ansible variables.</div></div>
+      <div class="cell"><div class="tag">Discovery</div><div class="title">Dynamic inventory</div><div class="desc">AWS EC2 plugin — no hand-maintained IP lists.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"><span>04 / STRUCTURE</span><div class="line"></div></div>
+
+  <section class="tight">
+    <div class="section-head">
+      <div class="num">REPOSITORY LAYOUT</div>
+      <h2>Modular roles, one entry point</h2>
+      <p class="section-desc">Each role follows the standard Ansible structure — defaults, handlers, tasks, templates — keeping components independently testable.</p>
+    </div>
+    <div class="filetree">ansible_config/
+├── <span class="dir">playbooks/</span>        <span class="comment"># 01-common → 11-install-monitoring, orchestrated by site.yml</span>
+├── <span class="dir">roles/</span>             <span class="comment"># common, containerd, kubernetes, bootstrap_control_plane,</span>
+│                    <span class="comment"># join_control_plane, install_cni, join_workers, install_helm,</span>
+│                    <span class="comment"># install_platform, install_monitoring, validation</span>
+├── <span class="dir">inventory/</span>
+│   └── aws_ec2.<span class="yml">yml</span>     <span class="comment"># dynamic AWS EC2 inventory plugin</span>
+├── <span class="dir">scripts/</span>
+│   └── generate_tf_vars.py <span class="comment"># Terraform outputs → Ansible vars</span>
+├── <span class="dir">vars/</span>              <span class="comment"># terraform, kubernetes, calico, helm, validation …</span>
+└── <span class="dir">terraform/</span>
+    └── outputs.json</div>
+  </section>
+
+  <div class="divider"><span>05 / PLATFORM</span><div class="line"></div></div>
+
+  <section class="tight">
+    <div class="section-head">
+      <div class="num">SHIPPED VIA HELM</div>
+      <h2>Platform &amp; observability layer</h2>
+    </div>
+    <p class="section-desc" style="margin-bottom:0;">Application layer</p>
+    <div class="chiprow">
+      <span class="chip platform">Ingress NGINX</span>
+      <span class="chip platform">cert-manager</span>
+      <span class="chip platform">Metrics Server</span>
+      <span class="chip platform">AWS EBS CSI Driver</span>
+      <span class="chip platform">Cluster Autoscaler</span>
+      <span class="chip platform">Argo CD</span>
+    </div>
+    <p class="section-desc" style="margin-top:22px; margin-bottom:0;">Observability layer</p>
+    <div class="chiprow">
+      <span class="chip mon">Prometheus</span>
+      <span class="chip mon">Grafana</span>
+      <span class="chip mon">Alertmanager</span>
+      <span class="chip mon">Loki</span>
+      <span class="chip mon">Promtail</span>
+      <span class="chip mon">kube-state-metrics</span>
+    </div>
+  </section>
+
+  <div class="divider"><span>06 / VALIDATION</span><div class="line"></div></div>
+
+  <section class="tight">
+    <div class="section-head">
+      <div class="num">TRUST BUT VERIFY</div>
+      <h2>Every layer is health-checked before the cluster is "done"</h2>
+      <p class="section-desc">The validation role checks nodes, control plane, API server, etcd, CoreDNS, workloads, platform, and monitoring — in that order — before declaring the cluster production-ready.</p>
+    </div>
+    <div class="checklist">
+      <div class="check-item"><span class="mark">✓</span><div><span class="lbl">Node readiness</span><span class="sub">kubectl get nodes — Ready across the fleet</span></div></div>
+      <div class="check-item"><span class="mark">✓</span><div><span class="lbl">Control plane static pods</span><span class="sub">apiserver, controller-manager, scheduler, etcd</span></div></div>
+      <div class="check-item"><span class="mark">✓</span><div><span class="lbl">API server health</span><span class="sub">/healthz returns ok</span></div></div>
+      <div class="check-item"><span class="mark">✓</span><div><span class="lbl">etcd cluster health</span><span class="sub">dynamically discovered, endpoint health checked</span></div></div>
+      <div class="check-item"><span class="mark">✓</span><div><span class="lbl">CoreDNS</span><span class="sub">replica readiness confirms service discovery</span></div></div>
+      <div class="check-item"><span class="mark">✓</span><div><span class="lbl">Workload &amp; platform state</span><span class="sub">pods, namespaces, deployments, daemonsets</span></div></div>
+    </div>
+
+    <div class="terminal" style="margin-top:26px;">
+      <div class="term-bar"><span class="tdot"></span><span class="tdot"></span><span class="tdot"></span><span class="path">validation — ansible-playbook playbooks/10-validation.yml</span></div>
+      <div class="term-body">
+        <div><span class="prompt">$</span> <span class="cmd">ansible-playbook -i inventory/aws_ec2.yml playbooks/10-validation.yml</span></div>
+        <div style="margin-top:10px; color:var(--text-faint);">====================================</div>
+        <div class="term-line"><span>CLUSTER VALIDATION</span><span class="val">PASSED</span></div>
+        <div class="term-line"><span>Cluster</span><span style="color:var(--text)">k8s-pr</span></div>
+        <div class="term-line"><span>Nodes</span><span class="val">READY</span></div>
+        <div class="term-line"><span>API Server</span><span class="val">HEALTHY</span></div>
+        <div class="term-line"><span>etcd</span><span class="val">HEALTHY</span></div>
+        <div class="term-line"><span>CoreDNS</span><span class="val">HEALTHY</span></div>
+        <div class="term-line"><span>Prometheus</span><span class="val">READY</span></div>
+        <div class="term-line"><span>Grafana</span><span class="val">READY</span></div>
+        <div class="term-line"><span>Loki</span><span class="val">READY</span></div>
+        <div class="term-line"><span>Promtail</span><span class="val">READY</span></div>
+        <div style="margin-top:4px; color:var(--text-faint);">====================================</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><span>07 / PRINCIPLES</span><div class="line"></div></div>
+
+  <section class="tight">
+    <div class="section-head">
+      <div class="num">ENGINEERING DECISIONS</div>
+      <h2>Why it's built this way</h2>
+    </div>
+    <div class="principles">
+      <div class="principle"><div class="p-num">→</div><div class="p-title">Infra / config split</div><div class="p-desc">Terraform never touches OS or cluster state; Ansible never provisions AWS resources.</div></div>
+      <div class="principle"><div class="p-num">→</div><div class="p-title">Dynamic inventory</div><div class="p-desc">No hard-coded IPs — nodes are discovered from AWS tags, resilient to ASG churn.</div></div>
+      <div class="principle"><div class="p-num">→</div><div class="p-title">Idempotent by design</div><div class="p-desc">Re-running site.yml never disrupts an already-healthy cluster.</div></div>
+      <div class="principle"><div class="p-num">→</div><div class="p-title">Validation-first</div><div class="p-desc">Nothing is declared "ready" without an automated, layer-by-layer health check.</div></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="fmono">status: <span class="ok">production-ready</span> · maintained via Ansible + Terraform</div>
+    <div class="fmono">kubectl --kubeconfig=/etc/kubernetes/admin.conf get nodes</div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,4 +1,3 @@
----
 
 - name: Add Kubernetes platform Helm repositories
   become: true
@@ -7,8 +6,6 @@
     name: "{{ item.value.name }}"
     repo_url: "{{ item.value.url }}"
     state: present
-  environment:
-    HOME: "/home/ubuntu"
   loop: "{{ helm_repositories | dict2items }}"
   loop_control:
     label: "{{ item.value.name }}"

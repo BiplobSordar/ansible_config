@@ -1,4 +1,3 @@
----
 
 - name: Install Ingress NGINX
   become: true
@@ -14,8 +13,8 @@
       - "{{ platform_values_dir }}/ingress-nginx.yaml"
     wait: true
     atomic: true
-  environment:
-    HOME: "/home/ubuntu"
+    environment:
+      HOME: "/home/ubuntu"
 
 - name: Install Metrics Server
   become: true
@@ -31,8 +30,8 @@
       - "{{ platform_values_dir }}/metrics-server.yaml"
     wait: true
     atomic: true
-  environment:
-    HOME: "/home/ubuntu"
+    environment:
+      HOME: "/home/ubuntu"
 
 - name: Install cert-manager
   become: true
@@ -48,8 +47,8 @@
       - "{{ platform_values_dir }}/cert-manager.yaml"
     wait: true
     atomic: true
-  environment:
-    HOME: "/home/ubuntu"
+    environment:
+      HOME: "/home/ubuntu"
 
 - name: Install AWS EBS CSI Driver
   become: true
@@ -65,8 +64,8 @@
       - "{{ platform_values_dir }}/aws-ebs-csi.yaml"
     wait: true
     atomic: true
-  environment:
-    HOME: "/home/ubuntu"
+    environment:
+      HOME: "/home/ubuntu"
 
 - name: Install Cluster Autoscaler
   become: true
@@ -82,8 +81,8 @@
       - "{{ platform_values_dir }}/cluster-autoscaler.yaml"
     wait: true
     atomic: true
-  environment:
-    HOME: "/home/ubuntu"
+    environment:
+      HOME: "/home/ubuntu"
 
 - name: Install Argo CD
   become: true
@@ -99,5 +98,5 @@
       - "{{ platform_values_dir }}/argocd.yaml"
     wait: true
     atomic: true
-  environment:
-    HOME: "/home/ubuntu"
+    environment:
+      HOME: "/home/ubuntu"

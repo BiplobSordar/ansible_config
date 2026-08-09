@@ -2,6 +2,9 @@ config:
   clients:
     - url: http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push
 
+  positions:
+    filename: /run/promtail/positions.yaml
+
   snippets:
     pipelineStages:
       - cri: {}
@@ -9,26 +12,26 @@ config:
     scrapeConfigs: |
       - job_name: kubernetes-pods
 
-        kubernetes_sd_configs:
-          - role: pod
+        static_configs:
+          - targets:
+              - localhost
+            labels:
+              job: kubernetes-pods
+              __path__: /var/log/pods/*/*/*.log
 
-        relabel_configs:
+  logLevel: info
+  logFormat: logfmt
 
-          - source_labels:
-              - __meta_kubernetes_namespace
-            target_label: namespace
+daemonset:
+  enabled: true
 
-          - source_labels:
-              - __meta_kubernetes_pod_name
-            target_label: pod
+  extraVolumes:
+    - name: pods
+      hostPath:
+        path: /var/log/pods
+        type: Directory
 
-          - source_labels:
-              - __meta_kubernetes_pod_container_name
-            target_label: container
-
-          - source_labels:
-              - __meta_kubernetes_pod_uid
-              - __meta_kubernetes_pod_container_name
-            separator: /
-            target_label: __path__
-            replacement: /var/log/pods/*$1/*$2/*.log
+  extraVolumeMounts:
+    - name: pods
+      mountPath: /var/log/pods
+      readOnly: true

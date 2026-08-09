@@ -1,3 +1,11 @@
+- name: Create monitoring namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ monitoring_namespace }}"
+    state: present
+    kubeconfig: "{{ monitoring_kubeconfig }}"
+
 - name: Install kube-prometheus-stack
   kubernetes.core.helm:
     kubeconfig: "{{ monitoring_kubeconfig }}"

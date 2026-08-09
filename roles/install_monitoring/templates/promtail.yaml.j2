@@ -1,4 +1,8 @@
 config:
+  logLevel: info
+  logFormat: logfmt
+  serverPort: 3101
+
   clients:
     - url: http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push
 
@@ -31,25 +35,3 @@ config:
             separator: /
             target_label: __path__
             replacement: /var/log/pods/*$1/*$2/*.log
-
-daemonset:
-  enabled: true
-
-tolerations:
-  - operator: Exists
-
-extraVolumes:
-  - name: pods
-    hostPath:
-      path: /var/log/pods
-  - name: run
-    hostPath:
-      path: /run/promtail
-
-extraVolumeMounts:
-  - name: pods
-    mountPath: /var/log/pods
-    readOnly: true
-
-  - name: run
-    mountPath: /run/promtail

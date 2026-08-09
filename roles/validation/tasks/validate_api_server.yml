@@ -1,42 +1,19 @@
+
 ---
-
 - name: Check API server health
-
   ansible.builtin.command:
-
-
     cmd: >
-
       kubectl
-
       --kubeconfig={{ validation_admin_conf_path }}
-
       get --raw=/healthz
-
-
   register: api_health
-
-
   changed_when: false
 
-
-
 - name: Assert API server healthy
-
-
   ansible.builtin.assert:
-
-
     that:
+      - api_health.rc == 0
+      - api_health.stdout | trim == "ok"
+    fail_msg: "API Server unhealthy"
+    success_msg: "API Server healthy"
 
-      - api_health.stdout == "ok"
-
-
-    fail_msg:
-
-      "API Server unhealthy"
-
-
-    success_msg:
-
-      "API Server healthy"

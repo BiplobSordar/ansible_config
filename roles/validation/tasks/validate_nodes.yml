@@ -1,47 +1,29 @@
+
 ---
-
 - name: Get cluster nodes status
-
   ansible.builtin.command:
-
     cmd: >
-
       kubectl
-
       --kubeconfig={{ validation_admin_conf_path }}
-
       get nodes
-
       -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.conditions[?(@.type=="Ready")].status}{"\n"}{end}'
-
-
   register: nodes_status
-
-
   changed_when: false
 
-
+- name: Validate nodes exist
+  ansible.builtin.assert:
+    that:
+      - nodes_status.stdout | trim | length > 0
+    fail_msg: "No Kubernetes nodes found"
 
 - name: Validate all nodes Ready
-
   ansible.builtin.assert:
-
-
     that:
-
       - "'False' not in nodes_status.stdout"
-
       - "'Unknown' not in nodes_status.stdout"
+      - "'True' in nodes_status.stdout"
+    fail_msg: >
+      One or more nodes are unhealthy:
+      {{ nodes_status.stdout | trim }}
+    success_msg: "All Kubernetes nodes are Ready"
 
-      - nodes_status.stdout | length > 0
-
-
-
-    fail_msg:
-
-      "One or more nodes are unhealthy {{ nodes_status.stdout }}"
-
-
-    success_msg:
-
-      "All Kubernetes nodes are Ready"

@@ -1,34 +1,40 @@
+
 ---
-
-- name: Find unhealthy pods
-
-
+- name: Get all Kubernetes pods
   ansible.builtin.command:
-
-
     cmd: >
-
       kubectl
-
       --kubeconfig={{ validation_admin_conf_path }}
-
       get pods
-
       --all-namespaces
-
-
-
+      -o wide
   register: pods
-
-
   changed_when: false
 
-
-
-- name: Report pod status
-
-
+- name: Display pod status
   ansible.builtin.debug:
-
-
     var: pods.stdout_lines
+
+- name: Find unhealthy pods
+  ansible.builtin.shell: |
+    kubectl \
+      --kubeconfig={{ validation_admin_conf_path }} \
+      get pods \
+      --all-namespaces \
+      --field-selector=status.phase!=Running,status.phase!=Succeeded \
+      -o custom-columns='NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.phase' \
+      --no-headers
+  register: unhealthy_pods
+  changed_when: false
+  failed_when: false
+
+- name: Validate unhealthy pods
+  ansible.builtin.assert:
+    that:
+      - unhealthy_pods.stdout | trim | length == 0
+    fail_msg: |
+      Unhealthy Kubernetes pods detected:
+
+      {{ unhealthy_pods.stdout | trim }}
+    success_msg: "All Kubernetes pods have healthy phases"
+

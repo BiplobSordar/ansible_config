@@ -1,62 +1,88 @@
+
 ---
-
-- name: Check etcd health
-
-
-  ansible.builtin.command:
-
-
-    cmd: >
-
-      kubectl
-
-      --kubeconfig={{ validation_admin_conf_path }}
-
-      -n kube-system
-
-      exec etcd-{{ inventory_hostname }}
-
-      --
-
-      etcdctl
-
-      --endpoints=https://127.0.0.1:2379
-
-      --cacert=/etc/kubernetes/pki/etcd/ca.crt
-
-      --cert=/etc/kubernetes/pki/etcd/server.crt
-
-      --key=/etc/kubernetes/pki/etcd/server.key
-
-      endpoint health
-
-
-
-  register: etcd_health
-
-
+- name: Get local Kubernetes node name
+  ansible.builtin.shell: |
+    kubectl \
+      --kubeconfig={{ validation_admin_conf_path }} \
+      get nodes \
+      -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .status.addresses[*]}{.type}={.address}{" "}{end}{"\n"}{end}' \
+      | awk '$0 ~ /InternalIP={{ ansible_host }}/ {print $1}'
+  register: local_node
   changed_when: false
 
-
-
-- name: Validate etcd
-
-
+- name: Validate local Kubernetes node name
   ansible.builtin.assert:
-
-
     that:
+      - local_node.stdout | trim | length > 0
+    fail_msg: "Could not determine Kubernetes node name for {{ ansible_host }}"
+    success_msg: "Kubernetes node detected: {{ local_node.stdout | trim }}"
 
+- name: Find local etcd pod
+  ansible.builtin.shell: |
+    kubectl \
+      --kubeconfig={{ validation_admin_conf_path }} \
+      -n kube-system \
+      get pods \
+      -l component=etcd \
+      --field-selector spec.nodeName={{ local_node.stdout | trim }} \
+      -o jsonpath='{.items[0].metadata.name}'
+  register: etcd_pod
+  changed_when: false
 
+- name: Validate local etcd pod exists
+  ansible.builtin.assert:
+    that:
+      - etcd_pod.stdout | trim | length > 0
+    fail_msg: "No etcd pod found on {{ local_node.stdout | trim }}"
+    success_msg: "etcd pod found: {{ etcd_pod.stdout | trim }}"
+
+- name: Check etcd pod status
+  ansible.builtin.command:
+    cmd: >
+      kubectl
+      --kubeconfig={{ validation_admin_conf_path }}
+      -n kube-system
+      get pod {{ etcd_pod.stdout | trim }}
+      -o jsonpath='{.status.phase}'
+  register: etcd_pod_status
+  changed_when: false
+
+- name: Validate etcd pod running
+  ansible.builtin.assert:
+    that:
+      - etcd_pod_status.stdout | trim == "Running"
+    fail_msg: >
+      etcd pod {{ etcd_pod.stdout | trim }} is not Running.
+      Current status: {{ etcd_pod_status.stdout | trim }}
+    success_msg: >
+      etcd pod {{ etcd_pod.stdout | trim }} is Running
+
+- name: Check etcd endpoint health
+  ansible.builtin.command:
+    cmd: >
+      kubectl
+      --kubeconfig={{ validation_admin_conf_path }}
+      -n kube-system
+      exec {{ etcd_pod.stdout | trim }}
+      --
+      etcdctl
+      --endpoints=https://127.0.0.1:2379
+      --cacert=/etc/kubernetes/pki/etcd/ca.crt
+      --cert=/etc/kubernetes/pki/etcd/server.crt
+      --key=/etc/kubernetes/pki/etcd/server.key
+      endpoint
+      health
+  register: etcd_health
+  changed_when: false
+
+- name: Validate etcd health
+  ansible.builtin.assert:
+    that:
+      - etcd_health.rc == 0
       - "'healthy' in etcd_health.stdout"
+    fail_msg: >
+      etcd unhealthy on {{ local_node.stdout | trim }}.
+      {{ etcd_health.stdout | trim }}
+    success_msg: >
+      etcd healthy on {{ local_node.stdout | trim }}
 
-
-    fail_msg:
-
-      "etcd unhealthy"
-
-
-
-    success_msg:
-
-      "etcd healthy"

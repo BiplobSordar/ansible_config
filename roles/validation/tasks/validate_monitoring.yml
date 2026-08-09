@@ -1,133 +1,117 @@
+
 ---
-
-###############################################################################
-# Monitoring Namespace
-###############################################################################
-
-
 - name: Check monitoring namespace
-
-
   kubernetes.core.k8s_info:
-
-
     kubeconfig: "{{ validation_admin_conf_path }}"
-
-
+    api_version: v1
     kind: Namespace
-
-
     name: "{{ validation_monitoring_namespace }}"
-
-
   register: monitoring_ns
 
-
-
 - name: Validate monitoring namespace
-
-
   ansible.builtin.assert:
-
-
     that:
-
-
       - monitoring_ns.resources | length == 1
-
-
+    fail_msg: "Monitoring namespace does not exist"
+    success_msg: "Monitoring namespace exists"
 
 
 ###############################################################################
 # Deployments
 ###############################################################################
 
-
 - name: Check monitoring deployments
-
-
   kubernetes.core.k8s_info:
-
-
     kubeconfig: "{{ validation_admin_conf_path }}"
-
-
     api_version: apps/v1
-
-
     kind: Deployment
-
-
-    namespace: monitoring
-
-
+    namespace: "{{ validation_monitoring_namespace }}"
     name: "{{ item }}"
-
-
   loop: "{{ validation_monitoring_deployments }}"
-
-
   register: monitoring_deployments
 
-
-
-- name: Validate deployments ready
-
-
+- name: Validate monitoring deployments
   ansible.builtin.assert:
-
-
     that:
-
-
-      - item.resources | length > 0
-
-      - item.resources[0].status.readyReplicas | default(0) | int > 0
-
-
+      - item.resources | length == 1
+      - item.resources[0].status.readyReplicas | default(0) | int ==
+        item.resources[0].spec.replicas | int
+      - item.resources[0].status.availableReplicas | default(0) | int ==
+        item.resources[0].spec.replicas | int
+    fail_msg: >
+      Deployment {{ item.item }} is not ready.
+      Desired={{ item.resources[0].spec.replicas | default(0) }},
+      Ready={{ item.resources[0].status.readyReplicas | default(0) }},
+      Available={{ item.resources[0].status.availableReplicas | default(0) }}
+    success_msg: >
+      Deployment {{ item.item }} is ready
   loop: "{{ monitoring_deployments.results }}"
 
 
-
-
 ###############################################################################
-# DaemonSet Promtail
+# StatefulSets
 ###############################################################################
 
-
-- name: Check Promtail
-
-
+- name: Check monitoring statefulsets
   kubernetes.core.k8s_info:
-
-
     kubeconfig: "{{ validation_admin_conf_path }}"
-
-
     api_version: apps/v1
+    kind: StatefulSet
+    namespace: "{{ validation_monitoring_namespace }}"
+    name: "{{ item }}"
+  loop: "{{ validation_monitoring_statefulsets }}"
+  register: monitoring_statefulsets
 
-
-    kind: DaemonSet
-
-
-    namespace: monitoring
-
-
-    name: promtail
-
-
-
-  register: promtail
-
-
-
-- name: Validate Promtail
-
-
+- name: Validate monitoring statefulsets
   ansible.builtin.assert:
-
-
     that:
+      - item.resources | length == 1
+      - item.resources[0].status.readyReplicas | default(0) | int ==
+        item.resources[0].spec.replicas | int
+      - item.resources[0].status.currentReplicas | default(0) | int ==
+        item.resources[0].spec.replicas | int
+    fail_msg: >
+      StatefulSet {{ item.item }} is not ready.
+      Desired={{ item.resources[0].spec.replicas | default(0) }},
+      Current={{ item.resources[0].status.currentReplicas | default(0) }},
+      Ready={{ item.resources[0].status.readyReplicas | default(0) }}
+    success_msg: >
+      StatefulSet {{ item.item }} is ready
+  loop: "{{ monitoring_statefulsets.results }}"
 
 
-      - promtail.resources[0].status.numberReady | int > 0
+###############################################################################
+# DaemonSets
+###############################################################################
+
+- name: Check monitoring daemonsets
+  kubernetes.core.k8s_info:
+    kubeconfig: "{{ validation_admin_conf_path }}"
+    api_version: apps/v1
+    kind: DaemonSet
+    namespace: "{{ validation_monitoring_namespace }}"
+    name: "{{ item }}"
+  loop: "{{ validation_monitoring_daemonsets }}"
+  register: monitoring_daemonsets
+
+- name: Validate monitoring daemonsets
+  ansible.builtin.assert:
+    that:
+      - item.resources | length == 1
+      - item.resources[0].status.desiredNumberScheduled | int > 0
+      - item.resources[0].status.currentNumberScheduled | int ==
+        item.resources[0].status.desiredNumberScheduled | int
+      - item.resources[0].status.numberReady | int ==
+        item.resources[0].status.desiredNumberScheduled | int
+      - item.resources[0].status.numberAvailable | int ==
+        item.resources[0].status.desiredNumberScheduled | int
+    fail_msg: >
+      DaemonSet {{ item.item }} is not ready.
+      Desired={{ item.resources[0].status.desiredNumberScheduled | default(0) }},
+      Current={{ item.resources[0].status.currentNumberScheduled | default(0) }},
+      Ready={{ item.resources[0].status.numberReady | default(0) }},
+      Available={{ item.resources[0].status.numberAvailable | default(0) }}
+    success_msg: >
+      DaemonSet {{ item.item }} is ready
+  loop: "{{ monitoring_daemonsets.results }}"
+

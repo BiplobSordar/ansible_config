@@ -3,53 +3,64 @@
 # Helm Platform Validation
 ###############################################################################
 
-
-- name: Validate namespaces
-
-  command: >
-
-    kubectl
-    --kubeconfig={{ validation_admin_conf_path }}
-    get namespace {{ item }}
-
-
+- name: Validate required namespaces
+  ansible.builtin.command:
+    cmd: >
+      kubectl
+      --kubeconfig={{ validation_admin_conf_path }}
+      get namespace {{ item }}
   loop: "{{ validation_required_namespaces }}"
-
-
+  register: namespace_validation
   changed_when: false
 
-
-
-
-- name: Validate deployments
-
-  command: >
-
-    kubectl
-    --kubeconfig={{ validation_admin_conf_path }}
-    -n {{ item.split('/')[0] }}
-    get deployment {{ item.split('/')[1] }}
-
-
+- name: Validate required deployments
+  ansible.builtin.command:
+    cmd: >
+      kubectl
+      --kubeconfig={{ validation_admin_conf_path }}
+      -n {{ item.split('/')[0] }}
+      get deployment {{ item.split('/')[1] }}
+      -o jsonpath='{.status.readyReplicas}{" "}{.status.replicas}{" "}{.status.availableReplicas}'
   loop: "{{ validation_required_deployments }}"
-
-
+  register: deployment_validation
   changed_when: false
 
+- name: Assert required deployments are ready
+  ansible.builtin.assert:
+    that:
+      - item.stdout.split()[0] | default('0') | int > 0
+      - item.stdout.split()[0] | int == item.stdout.split()[1] | int
+      - item.stdout.split()[0] | int == item.stdout.split()[2] | int
+    fail_msg: >
+      Deployment {{ item.item }} is not ready.
+      Ready/Replicas/Available: {{ item.stdout | default('0 0 0') }}
+    success_msg: >
+      Deployment {{ item.item }} is ready.
+      Ready/Replicas/Available: {{ item.stdout }}
+  loop: "{{ deployment_validation.results }}"
 
-
-
-- name: Validate daemonsets
-
-  command: >
-
-    kubectl
-    --kubeconfig={{ validation_admin_conf_path }}
-    -n {{ item.split('/')[0] }}
-    get daemonset {{ item.split('/')[1] }}
-
-
+- name: Validate required daemonsets
+  ansible.builtin.command:
+    cmd: >
+      kubectl
+      --kubeconfig={{ validation_admin_conf_path }}
+      -n {{ item.split('/')[0] }}
+      get daemonset {{ item.split('/')[1] }}
+      -o jsonpath='{.status.numberReady}{" "}{.status.desiredNumberScheduled}{" "}{.status.numberAvailable}'
   loop: "{{ validation_required_daemonsets }}"
-
-
+  register: daemonset_validation
   changed_when: false
+
+- name: Assert required daemonsets are ready
+  ansible.builtin.assert:
+    that:
+      - item.stdout.split()[0] | int > 0
+      - item.stdout.split()[0] | int == item.stdout.split()[1] | int
+      - item.stdout.split()[0] | int == item.stdout.split()[2] | int
+    fail_msg: >
+      DaemonSet {{ item.item }} is not ready.
+      Ready/Desired/Available: {{ item.stdout }}
+    success_msg: >
+      DaemonSet {{ item.item }} is ready.
+      Ready/Desired/Available: {{ item.stdout }}
+  loop: "{{ daemonset_validation.results }}"

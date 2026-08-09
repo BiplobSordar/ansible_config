@@ -1,67 +1,48 @@
+
 ---
-
 - name: Get control plane nodes
-
   ansible.builtin.command:
-
     cmd: >
-
       kubectl
-
       --kubeconfig={{ validation_admin_conf_path }}
-
       get nodes
-
-
+      -l node-role.kubernetes.io/control-plane
+      -o name
   register: cp_nodes
-
-
   changed_when: false
 
-
+- name: Validate control plane nodes exist
+  ansible.builtin.assert:
+    that:
+      - cp_nodes.stdout_lines | length >= 3
+    fail_msg: >
+      Expected at least 3 control-plane nodes,
+      found {{ cp_nodes.stdout_lines | length }}
+    success_msg: >
+      {{ cp_nodes.stdout_lines | length }} control-plane nodes detected
 
 - name: Validate static pods
-
-
   ansible.builtin.command:
-
     cmd: >
-
       kubectl
-
       --kubeconfig={{ validation_admin_conf_path }}
-
-      get pods
-
       -n kube-system
-
+      get pods
       -l component={{ item }}
-
+      -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.phase}{"\n"}{end}'
   loop: "{{ validation_required_static_pods }}"
-
-
   register: static_pods
-
-
   changed_when: false
 
-
-
-- name: Assert static pods exist
-
-
+- name: Validate static pods exist
   ansible.builtin.assert:
-
-
     that:
-
-
-      - item.stdout | length > 0
-
-
-    fail_msg:
-
-      "Static pod {{ item.item }} missing"
-
-
+      - item.stdout | trim | length > 0
+      - "'Running' in item.stdout"
+    fail_msg: >
+      Static pod {{ item.item }} is missing or not Running.
+      Output: {{ item.stdout | trim }}
+    success_msg: >
+      Static pod {{ item.item }} is Running
   loop: "{{ static_pods.results }}"
+

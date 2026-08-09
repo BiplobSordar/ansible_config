@@ -1,47 +1,32 @@
----
 
 - name: Create monitoring configuration directory
-
   ansible.builtin.file:
-
     path: /etc/kubernetes/monitoring
-
     state: directory
-
+    owner: root
+    group: root
     mode: "0755"
 
-
-
 - name: Create Prometheus values
-
   ansible.builtin.template:
-
     src: kube-prometheus-stack.yaml.j2
-
     dest: /etc/kubernetes/monitoring/prometheus.yaml
-
+    owner: root
+    group: root
     mode: "0644"
-
-
 
 - name: Create Loki values
-
   ansible.builtin.template:
-
     src: loki.yaml.j2
-
     dest: /etc/kubernetes/monitoring/loki.yaml
-
+    owner: root
+    group: root
     mode: "0644"
 
-
-
 - name: Create Promtail values
-
   ansible.builtin.template:
-
     src: promtail.yaml.j2
-
     dest: /etc/kubernetes/monitoring/promtail.yaml
-
+    owner: root
+    group: root
     mode: "0644"

@@ -2,6 +2,8 @@
 - name: Install Ingress NGINX
   become: true
   become_user: ubuntu
+  environment:
+    HOME: "/home/ubuntu"
   kubernetes.core.helm:
     kubeconfig: "{{ platform_kubeconfig }}"
     name: "{{ helm_charts.ingress_nginx.release }}"
@@ -13,12 +15,13 @@
       - "{{ platform_values_dir }}/ingress-nginx.yaml"
     wait: true
     atomic: true
-    environment:
-      HOME: "/home/ubuntu"
+   
 
 - name: Install Metrics Server
   become: true
   become_user: ubuntu
+  environment:
+    HOME: "/home/ubuntu"
   kubernetes.core.helm:
     kubeconfig: "{{ platform_kubeconfig }}"
     name: "{{ helm_charts.metrics_server.release }}"
@@ -30,12 +33,13 @@
       - "{{ platform_values_dir }}/metrics-server.yaml"
     wait: true
     atomic: true
-    environment:
-      HOME: "/home/ubuntu"
+    
 
 - name: Install cert-manager
   become: true
   become_user: ubuntu
+  environment:
+    HOME: "/home/ubuntu"
   kubernetes.core.helm:
     kubeconfig: "{{ platform_kubeconfig }}"
     name: "{{ helm_charts.cert_manager.release }}"
@@ -47,12 +51,13 @@
       - "{{ platform_values_dir }}/cert-manager.yaml"
     wait: true
     atomic: true
-    environment:
-      HOME: "/home/ubuntu"
+    
 
 - name: Install AWS EBS CSI Driver
   become: true
   become_user: ubuntu
+  environment:
+    HOME: "/home/ubuntu"
   kubernetes.core.helm:
     kubeconfig: "{{ platform_kubeconfig }}"
     name: "{{ helm_charts.aws_ebs_csi.release }}"
@@ -64,12 +69,13 @@
       - "{{ platform_values_dir }}/aws-ebs-csi.yaml"
     wait: true
     atomic: true
-    environment:
-      HOME: "/home/ubuntu"
+    
 
 - name: Install Cluster Autoscaler
   become: true
   become_user: ubuntu
+  environment:
+    HOME: "/home/ubuntu"
   kubernetes.core.helm:
     kubeconfig: "{{ platform_kubeconfig }}"
     name: "{{ helm_charts.cluster_autoscaler.release }}"
@@ -81,12 +87,13 @@
       - "{{ platform_values_dir }}/cluster-autoscaler.yaml"
     wait: true
     atomic: true
-    environment:
-      HOME: "/home/ubuntu"
+    
 
 - name: Install Argo CD
   become: true
   become_user: ubuntu
+  environment:
+    HOME: "/home/ubuntu"
   kubernetes.core.helm:
     kubeconfig: "{{ platform_kubeconfig }}"
     name: "{{ helm_charts.argocd.release }}"
@@ -98,5 +105,4 @@
       - "{{ platform_values_dir }}/argocd.yaml"
     wait: true
     atomic: true
-    environment:
-      HOME: "/home/ubuntu"
+    

@@ -1,4 +1,4 @@
----
+
 - name: Install Kubernetes Monitoring Stack
   hosts: bootstrap
   become: true

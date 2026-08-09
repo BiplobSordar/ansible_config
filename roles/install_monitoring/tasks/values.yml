@@ -1,3 +1,10 @@
+- name: Create monitoring namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ monitoring_namespace }}"
+    state: present
+    kubeconfig: "{{ monitoring_kubeconfig }}"
 
 - name: Create monitoring configuration directory
   ansible.builtin.file:

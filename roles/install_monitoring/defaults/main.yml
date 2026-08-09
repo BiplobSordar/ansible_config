@@ -1,4 +1,3 @@
-
 monitoring_namespace: monitoring
 
 monitoring_kubeconfig: /etc/kubernetes/admin.conf

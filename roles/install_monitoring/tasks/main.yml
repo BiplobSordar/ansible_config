@@ -1,4 +1,3 @@
-
 - name: Install monitoring Python dependencies
   ansible.builtin.apt:
     name:
